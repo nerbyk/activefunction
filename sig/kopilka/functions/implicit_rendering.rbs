@@ -1,0 +1,11 @@
+module Kopilka::Functions
+  module ImplicitRendering
+    
+    def performed?: -> boolish
+    def process: (Options) -> nil
+    
+    private 
+    
+    def default_render: -> nil
+  end
+end 

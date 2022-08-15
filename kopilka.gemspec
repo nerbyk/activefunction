@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-require_relative "lib/kopilka/functions/version"
+require_relative "lib/kopilka/version"
 
 Gem::Specification.new do |spec|
   spec.name = "kopilka-functions"
-  spec.version = Kopilka::Functions::VERSION
+  spec.version = Kopilka::VERSION
   spec.authors = ["Nerbyk"]
-  spec.email = ["danil.maximov@flatstack.com"]
+  spec.email = ["danil.maximov2000@gmail.com"]
 
   spec.summary = "TODO: Write a short summary, because RubyGems requires one."
   spec.description = "TODO: Write a longer description or delete this line."
   spec.homepage = "TODO: Put your gem's website or public repo URL here."
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = '>= 2.6.7'
 
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 

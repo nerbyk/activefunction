@@ -1,0 +1,10 @@
+class Options
+  attr_reader json: Object
+  attr_reader status: Integer
+end
+
+module Kopilka::Functions
+  module JsonRenderer
+    def render_to_body: (options: Options) -> String
+  end 
+end 

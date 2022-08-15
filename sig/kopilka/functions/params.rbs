@@ -1,0 +1,16 @@
+module Kopilka::Functions
+  module Params
+    Error -> StandardError 
+    ParameterMissingError -> Error
+    
+    class Parameters 
+      def initialize: (Object params)
+      def []: (String key) -> Parameters | String
+      def require: (Symbol attribute) -> Parameters
+      def permit: (Symbol[] attributes) -> Parameters
+      def present?: -> Boolean
+    end 
+
+    def params(): -> Parameters
+  end 
+end 
