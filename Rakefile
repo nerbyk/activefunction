@@ -13,4 +13,18 @@ require "rubocop/rake_task"
 
 RuboCop::RakeTask.new
 
-task default: %i[test rubocop]
+
+task :steep do
+  require 'steep'
+  require 'steep/cli'
+
+  Steep::CLI.new(argv: ['check'], stdout: $stdout, stderr: $stderr, stdin: $stdin).run
+end
+
+namespace :steep do
+  task :stats do
+    exec "bundle exec steep stats --log-level=fatal --format=table'"
+  end
+end
+
+task default: %i[test rubocop steep]
