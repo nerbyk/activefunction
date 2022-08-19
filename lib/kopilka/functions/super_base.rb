@@ -14,9 +14,10 @@ module Kopilka::Functions
       (@action_name,  @request, @response) = env
 
       process(@action_name)
-      # rescue => e
-      # render json: { request: @request, error: e.message }, status: 500
-      # ensure
+
+    rescue => err
+      Kopilka::Logger.error(err)
+    ensure
       @response.to_h
     end
 

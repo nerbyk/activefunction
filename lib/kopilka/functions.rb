@@ -13,7 +13,7 @@ require_relative "functions/params"
 require_relative "functions/rendering"
 require_relative "functions/super_base"
 require_relative "functions/version"
-require_relative "functions/vendor_adapters/aws_lambda"
+require_relative "functions/logger"
 
 module Kopilka
   module Functions
