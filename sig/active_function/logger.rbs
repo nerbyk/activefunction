@@ -1,0 +1,8 @@
+module ActiveFunction 
+  class Logger
+    def error: (Exception err) -> void
+    def info: (Exception err) -> void
+    
+    private def logger: -> ::Logger
+  end 
+end 
