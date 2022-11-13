@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Kopilka::Functions
+module ActiveFunction::Functions
   module Callbacks
     CALLBACK_FILTER_TYPES = %i[before after].freeze
 

@@ -1,4 +1,4 @@
-class TestsFunctions < Kopilka::Functions
+class TestsFunctions < ActiveFunction::Functions
   @@tests = []
   Test = Struct.new("Test", :id, :name, :last_executed_at)
 

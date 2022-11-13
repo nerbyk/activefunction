@@ -1,4 +1,4 @@
-module Kopilka::Functions
+module ActiveFunction::Functions
   module Rendering
     def render: (Options) -> nil
   end 

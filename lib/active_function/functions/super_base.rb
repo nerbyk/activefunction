@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Kopilka::Functions
+module ActiveFunction::Functions
   class SuperBase
-    include KopilkaFunction::Rendering
+    include ActiveFunctionFunction::Rendering
 
     def self.dispatch(action_name, request, response)
       new.dispatch(action_name, request, response)
@@ -16,7 +16,7 @@ module Kopilka::Functions
       process(@action_name)
 
     rescue => err
-      Kopilka::Logger.error(err)
+      ActiveFunction::Logger.error(err)
     ensure
       @response.to_h
     end

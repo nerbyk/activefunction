@@ -2,7 +2,7 @@
 
 require 'json'
 
-module Kopilka::Functions
+module ActiveFunction::Functions
   module JsonRenderer
     def render_to_body(options)
       json = options[:json]

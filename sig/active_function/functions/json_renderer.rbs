@@ -3,7 +3,7 @@ class Options
   attr_reader status: Integer
 end
 
-module Kopilka::Functions
+module ActiveFunction::Functions
   module JsonRenderer
     def render_to_body: (options: Options) -> String
   end 

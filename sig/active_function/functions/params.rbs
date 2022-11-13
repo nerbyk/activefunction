@@ -1,4 +1,4 @@
-module Kopilka::Functions
+module ActiveFunction::Functions
   module Params
     Error -> StandardError 
     ParameterMissingError -> Error

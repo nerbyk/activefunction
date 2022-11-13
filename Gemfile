@@ -2,7 +2,7 @@
 
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in kopilka-functions.gemspec
+# Specify your gem's dependencies in activefunction.gemspec
 gemspec
 
 group :development do

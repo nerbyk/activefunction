@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Kopilka::Functions
+module ActiveFunction::Functions
   module ImplicitRendering
     def process(*)
       super

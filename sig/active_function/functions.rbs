@@ -1,4 +1,4 @@
-module Kopilka
+module ActiveFunction
   module Functions
     VERSION: String
   end

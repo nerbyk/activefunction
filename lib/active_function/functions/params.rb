@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Kopilka::Functions
+module ActiveFunction::Functions
   module Params
     Error                 = Class.new(StandardError)
     ParameterMissingError = Class.new(Error) { def initialize(param) = super("param is missing or the value is empty: #{param}") }
