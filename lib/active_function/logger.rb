@@ -1,7 +1,7 @@
 require "logger"
 
 module ActiveFunction
-  class Logger
+  class Logger # :nodoc:
     class << self
       def error(err)
         logger.error(err)

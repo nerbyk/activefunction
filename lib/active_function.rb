@@ -1,11 +1,14 @@
-require "./active_function/functions"
-require "./active_function/logger"
+# frozen_string_literal: true
 
 require "ruby-next"
 require "ruby-next/language/setup"
 
 RubyNext::Language.setup_gem_load_path(transpile: true)
 
-module ActiveFunction
-  include Functions
+module ActiveFunction # :nodoc:
+  class Error < StandardError; end
+
+  require "active_function/version"
+  require "active_function/base"
+  require "active_function/logger"
 end

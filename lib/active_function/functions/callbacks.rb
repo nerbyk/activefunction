@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ActiveFunctionFunctions
+module ActiveFunction
   class MiggingCallbackContext < Error # :no_doc:
     MESSAGE_TEMPLATE = "Missing callback context: %s"
 
@@ -11,68 +11,70 @@ module ActiveFunctionFunctions
     end
   end  
 
-  module Callbacks # :nodoc:
+  module Functions
+    module Callbacks # :nodoc:
 
-    class << self
-      def included(base)
-        base.extend(ClassMethods)
-      end
-    end
-
-    def process(*)
-      run_callbacks do
-        super
-      end
-    end
-
-    private
-
-    def run_callbacks
-      exec_callbacks(:before)
-
-      yield if block_given?
-
-      exec_callbacks(:after)
-    end
-
-    def exec_callbacks(type)
-      self.class.callbacks[type].each do |callback_method, filters|
-        raise MiggingCallbackContext, callback_method unless respond_to?(callback_method)
-
-        public_send(callback_method) if filters[:if][action_name]
-      end
-    end
-
-    module ClassMethods # :nodoc:
-      CALLBACKS = { before: {}, after: {} }.freeze
-
-      def before_action(method_name, **options)
-        set_callback(:before, method_name, filter(options))
-      end
-
-      def after_action(method_name, **options)
-        set_callback(:after, method_name, filter(options))
-      end
-
-      def callbacks
-        return @callbacks if instance_variable_defined?(:@callbacks)
-
-        @callbacks = CALLBACKS
-      end
-
-      def filter(options)
-        if only_list = options[:only]
-          options[:if] = proc { |action| only_list.map(&:to_s).include?(action) }
+      class << self
+        def included(base)
+          base.extend(ClassMethods)
         end
-
-        options
+      end
+  
+      def process(*)
+        run_callbacks do
+          super
+        end
       end
 
-      def set_callback(type, method_name, filters)
-        callbacks[type][method_name] = filters
+      private
+  
+      def run_callbacks
+        exec_callbacks(:before)
+  
+        yield if block_given?
+  
+        exec_callbacks(:after)
       end
-
-      private :filter, :set_callback
+  
+      def exec_callbacks(type)
+        self.class.callbacks[type].each do |callback_method, filters|
+          raise MiggingCallbackContext, callback_method unless respond_to?(callback_method)
+  
+          public_send(callback_method) if filters[:if][action_name]
+        end
+      end
+  
+      module ClassMethods # :nodoc:
+        CALLBACKS = { before: {}, after: {} }.freeze
+  
+        def before_action(method_name, **options)
+          set_callback(:before, method_name, filter(options))
+        end
+  
+        def after_action(method_name, **options)
+          set_callback(:after, method_name, filter(options))
+        end
+  
+        def callbacks
+          return @callbacks if instance_variable_defined?(:@callbacks)
+  
+          @callbacks = CALLBACKS
+        end
+  
+        def filter(options)
+          if only_list = options[:only]
+            options[:if] = proc { |action| only_list.map(&:to_s).include?(action) }
+          end
+  
+          options
+        end
+  
+        def set_callback(type, method_name, filters)
+          callbacks[type][method_name] = filters
+        end
+  
+        private :filter, :set_callback
+      end
     end
   end
 end

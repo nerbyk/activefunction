@@ -1,46 +1,54 @@
 # frozen_string_literal: true
 
-module ActiveFunction::Functions
-  module Params
-    Error                 = Class.new(StandardError)
-    ParameterMissingError = Class.new(Error) { def initialize(param) = super("param is missing or the value is empty: #{param}") }
+module ActiveFunction
+  class ParameterMissingError < Error 
+    MESSAGE_TEMPLATE = "Missing callback context: %s"
 
-    def params
-      @_params ||= Parameters.new @request[:queryStringParameters]
-    end
+    attr_reader :message
 
-    class Parameters
-      def initialize(params)
-        @params = params
+    def initialize(param)
+      MESSAGE_TEMPLATE % param
+    end 
+  end 
+
+  module Functions
+    module Params
+
+      def params
+        return @params if instance_variable_defined?(:@params)
+
+        # TODO: Support custom params path
+        @params = Parameters.new @request[:queryStringParameters]
       end
 
-      def [](key)
-        attribute = @params[key]
-        attribute.is_a?(Hash) ? Parameters.new(attribute) : attribute
-      end
+      class Parameters
+        def initialize(params)
+          @params = params
+        end
 
-      def require(attribute)
-        required_params = self[attribute]
+        def [](key)
+          attribute = @params[key]
+          attribute.is_a?(Hash) ? Parameters.new(attribute) : attribute
+        end
 
-        if required_params.present?
+        def require(attribute)
+          required_params = self[attribute]
+
+          raise ParameterMissingError, attribute unless required_params.present?
+
           required_params
-        else
-          raise ParameterMissingError, attribute
+        end
+
+        def permit(*attributes)
+          @params.select { |a| attributes.include? a.to_sym }
+        end
+
+        def present?
+          @params.any?
+
+          self
         end
       end
-
-      def permit(*attributes)
-        @params.select { |a| attributes.include? a.to_sym }
-      end
-
-      def present?
-        @params.any?
-
-        self
-      end
     end
-  end
+  end 
 end
-
-
-
