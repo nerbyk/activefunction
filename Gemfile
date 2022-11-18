@@ -2,28 +2,13 @@
 
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in activefunction.gemspec
+gem 'pry-byebug', platform: :mri
+
 gemspec
 
-group :development do
-  gem "rbs", "~> 2.5.0", require: false
-  gem "steep", "~> 1.0.0", require: false
+eval_gemfile "gemfiles/rubocop.gemfile"
+eval_gemfile "gemfiles/rbs.gemfile"
 
-  gem "rubocop", "~> 1.29.0", require: false
-  gem "rubocop-performance", require: false
-  gem "rubocop-rake", require: false
-  gem "rubocop-shopify", require: false
-  gem "ruby-next", require: false
-  gem "standard", "~> 1.12.1", require: false
-end
+local_gemfile = "#{File.dirname(__FILE__)}/Gemfile.local"
 
-group :test do
-  gem "minitest", "~> 5.15.0"
-  gem "minitest-hooks", "~> 1.5.0"
-  gem "minitest-rg", "~> 5.2.0"
-end
-
-group :test, :development do
-  gem "pry", "~> 0.14.1"
-  gem "rake", "~> 13.0"
-end
+eval(File.read(local_gemfile)) if File.exist?(local_gemfile) # rubocop:disable Security/Eval

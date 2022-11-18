@@ -6,3 +6,12 @@
 /pkg/
 /spec/reports/
 /tmp/
+
+.rbnext/
+gemfiles/*.lock
+
+Gemfile.lock
+Gemfile.local
+.rspec
+.ruby-version
+*.gem
