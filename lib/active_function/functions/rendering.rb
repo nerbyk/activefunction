@@ -11,5 +11,5 @@ module ActiveFunction
         self.response_body = rendered_body
       end
     end
-  end 
+  end
 end

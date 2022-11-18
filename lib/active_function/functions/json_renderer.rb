@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'json'
+require "json"
 
 module ActiveFunction
   module Functions
@@ -10,10 +10,10 @@ module ActiveFunction
         status = options[:status]
 
         @response.statusCode = status unless status.nil?
-        @response.headers['Content-Type'] = 'application/json'
+        @response.headers["Content-Type"] = "application/json"
 
         self.response_body = JSON.generate(json)
       end
     end
-  end 
-end 
+  end
+end

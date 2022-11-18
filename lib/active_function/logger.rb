@@ -6,11 +6,11 @@ module ActiveFunction
       def error(err)
         logger.error(err)
       end
-  
+
       def info(msg)
         logger.info(msg)
       end
-  
+
       def logger
         @logger ||= ::Logger.new($stdout).tap do |l|
           l.level = ::Logger::INFO
@@ -19,7 +19,7 @@ module ActiveFunction
           end
         end
       end
-  
+
       private_class_method :logger
     end
   end

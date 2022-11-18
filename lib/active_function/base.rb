@@ -10,13 +10,12 @@ module ActiveFunction
     require "active_function/functions/rendering"
     require "active_function/functions/routing"
 
-    include \
-      Function::Core,
-      Function::Callbacks,
-      Function::Params,
-      Function::ImplicitRendering,
-      Function::JsonRenderer,
-      Function::Rendering,
-      Function::Routing
+    include Function::Routing
+    include Function::Rendering
+    include Function::JsonRenderer
+    include Function::ImplicitRendering
+    include Function::Params
+    include Function::Callbacks
+    include Function::Core
   end
 end

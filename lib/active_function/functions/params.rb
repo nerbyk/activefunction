@@ -1,19 +1,18 @@
 # frozen_string_literal: true
 
 module ActiveFunction
-  class ParameterMissingError < Error 
+  class ParameterMissingError < Error
     MESSAGE_TEMPLATE = "Missing callback context: %s"
 
     attr_reader :message
 
     def initialize(param)
       MESSAGE_TEMPLATE % param
-    end 
-  end 
+    end
+  end
 
   module Functions
     module Params
-
       def params
         return @params if instance_variable_defined?(:@params)
 
@@ -50,5 +49,5 @@ module ActiveFunction
         end
       end
     end
-  end 
+  end
 end

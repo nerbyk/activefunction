@@ -13,5 +13,5 @@ module ActiveFunction
 
       private def default_render = render
     end
-  end 
-end 
+  end
+end

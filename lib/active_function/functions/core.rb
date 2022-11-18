@@ -13,7 +13,7 @@ module ActiveFunction
         (@action_name, @request, @response) = env
 
         process(@action_name)
-      rescue StandardError => e
+      rescue => e
         ActiveFunction::Logger.error(e)
       ensure
         @response.to_h
@@ -23,15 +23,15 @@ module ActiveFunction
 
       def route
         raise NotImplementedError, "routing is not implemented under #{self.class.name} class"
-      end 
-    
+      end
+
       private
-    
+
       def process(action_name) = public_send(action_name)
-    
+
       def response_body=(body)
         @response.body = body
-    
+
         @performed = true
       end
     end
