@@ -1,13 +1,33 @@
+require:
+  - standard/cop/block_single_line_braces
+  - ruby-next/rubocop
+
+inherit_gem:
+  standard: config/base.yml
+
 AllCops:
-  TargetRubyVersion: 3.1.2
+  Exclude:
+    - 'bin/*'
+    - 'tmp/**/*'
+    - 'Gemfile'
+    - 'vendor/**/*'
+    - 'gemfiles/**/*'
+    - 'lib/generators/**/templates/**/*'
+  DisplayCopNames: true
+  SuggestExtensions: false
+  TargetRubyVersion: next
 
-Style/StringLiterals:
+Standard/BlockSingleLineBraces:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
   Enabled: true
-  EnforcedStyle: double_quotes
 
-Style/StringLiteralsInInterpolation:
-  Enabled: true
-  EnforcedStyle: double_quotes
+Naming/FileName:
+  Exclude:
+   - '**/*.md'
 
-Layout/LineLength:
-  Max: 120
+# FIXME: Enable back when Ruby Next 0.14 is released
+Layout/SpaceAfterColon:
+  Enabled: false
+  

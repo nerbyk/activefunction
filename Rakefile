@@ -9,16 +9,20 @@ Rake::TestTask.new(:test) do |t|
   t.test_files = FileList["test/**/test_*.rb"]
 end
 
-require "rubocop/rake_task"
+begin
+  require "rubocop/rake_task"
+  RuboCop::RakeTask.new
+rescue LoadError
+  task(:rubocop) {}
+end
 
 RuboCop::RakeTask.new
 
-
 task :steep do
-  require 'steep'
-  require 'steep/cli'
+  require "steep"
+  require "steep/cli"
 
-  Steep::CLI.new(argv: ['check'], stdout: $stdout, stderr: $stderr, stdin: $stdin).run
+  Steep::CLI.new(argv: ["check"], stdout: $stdout, stderr: $stderr, stdin: $stdin).run
 end
 
 namespace :steep do
