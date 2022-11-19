@@ -8,14 +8,12 @@ module ActiveFunction
     require "active_function/functions/implicit_rendering"
     require "active_function/functions/json_renderer"
     require "active_function/functions/rendering"
-    require "active_function/functions/routing"
 
-    include Function::Routing
-    include Function::Rendering
-    include Function::JsonRenderer
-    include Function::ImplicitRendering
-    include Function::Params
-    include Function::Callbacks
-    include Function::Core
+    include Functions::Rendering
+    include Functions::JsonRenderer
+    include Functions::ImplicitRendering
+    include Functions::Params
+    include Functions::Callbacks
+    include Functions::Core
   end
 end

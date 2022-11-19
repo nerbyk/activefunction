@@ -16,8 +16,7 @@ module ActiveFunction
       def params
         return @params if instance_variable_defined?(:@params)
 
-        # TODO: Support custom params path
-        @params = Parameters.new @request[:queryStringParameters]
+        @params = Parameters.new @request[:body]
       end
 
       class Parameters

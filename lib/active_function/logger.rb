@@ -20,7 +20,7 @@ module ActiveFunction
         end
       end
 
-      private_class_method :logger
+      private :logger
     end
   end
 end
