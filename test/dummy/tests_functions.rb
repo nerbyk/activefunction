@@ -1,27 +1,27 @@
 require "./config/boot"
 require "active_function"
 
-
 module Routing
   API_ACTIONS = {
-    "GET": :index,
-    "POST": :create,
-    "DELETE": :destroy
+    GET: :index,
+    POST: :create,
+    DELETE: :destroy
   }.freeze
 
-  def handler(event:, context:)
+  def route(event:, context:)
     case ActiveFunction::EventSource.call(event)
-    when ActiveFunction::EventSource::API_GATEWAY_AWS_PROXY  
-      { API_ACTIONS[event["httpMethod"]] => event["queryStringParameters"] }
+    when ActiveFunction::EventSource::API_GATEWAY_AWS_PROXY
+      {action: API_ACTIONS[event["httpMethod"]], params: event["queryStringParameters"]}
     when ActiveFunction::EventSource::DYNAMO_DB
-      { db_event: event["Records"] }
-    else 
+      {action: :db_event, params: event.slice("Records")}
+    else
       raise "Unavailable event source"
     end
   end
 end
+
 class TestsFunctions < ActiveFunction::Base
-  extend ::Routing
+  include Routing
 
   PERMITED_PARAMS = %i[id name last_executed_at].freeze
 
@@ -29,7 +29,7 @@ class TestsFunctions < ActiveFunction::Base
   after_action :post_message, only: %i[destroy]
 
   def index
-    render json: { params: params }, status: 200
+    render json: {params: params}, status: 200
   end
 
   def create
@@ -41,7 +41,7 @@ class TestsFunctions < ActiveFunction::Base
   end
 
   def db_event
-
+    render json: {params: params.require("Records")}, status: 200
   end
 
   private
@@ -55,4 +55,4 @@ class TestsFunctions < ActiveFunction::Base
   end
 end
 
-p TestsFunctions.handler(event: { "Records" => [{ "EventSource" => "aws:dynamodb" }] }, context: nil)
+p TestsFunctions.handler(event: {"Records" => [{"EventSource" => "aws:dynamodb"}]}, context: nil)

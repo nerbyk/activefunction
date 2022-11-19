@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ActiveFunction
-  class MiggingCallbackContext < Error # :no_doc:
+  class MissingCallbackContext < Error # :no_doc:
     MESSAGE_TEMPLATE = "Missing callback context: %s"
 
     attr_reader :message
@@ -37,9 +37,9 @@ module ActiveFunction
 
       def exec_callbacks(type)
         self.class.callbacks[type].each do |callback_method, filters|
-          raise MiggingCallbackContext, callback_method unless respond_to?(callback_method)
-
-          public_send(callback_method) if filters[:if][action_name]
+          raise MissingCallbackContext, callback_method unless respond_to?(callback_method, true)
+          
+          send(callback_method) if filters[:if][action_name]
         end
       end
 

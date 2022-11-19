@@ -16,7 +16,7 @@ module ActiveFunction
       def params
         return @params if instance_variable_defined?(:@params)
 
-        @params = Parameters.new @request[:body]
+        @params = Parameters.new @request
       end
 
       class Parameters
@@ -32,7 +32,7 @@ module ActiveFunction
         def require(attribute)
           required_params = self[attribute]
 
-          raise ParameterMissingError, attribute unless required_params.present?
+          raise ParameterMissingError, attribute if required_params.nil?
 
           required_params
         end

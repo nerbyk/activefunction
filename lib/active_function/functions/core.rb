@@ -1,32 +1,56 @@
 module ActiveFunction
+  class WrongFunctionsRouteFormat < Error
+    MESSAGE_TEMPLATE = "Wrong functions route wormat: %s, expected: { action: Symbol, params: Hash }"
+
+    attr_reader :message
+
+    def initialize(context)
+      @message = MESSAGE_TEMPLATE % context
+    end
+  end
+
   module Functions
     module Core
-      EMPTY_HASH = {}.freeze
-      
-      def self.handler
-        new.dispatch(super, response = EMPTY_HASH)
-      end 
-      
-      attr_reader :action_name, :request, :response
+      class << self
+        def included(base)
+          base.extend(ClassMethods)
+        end
+      end
 
-      def dispatch(env)
-        [@action_name, @request, @response] => env
+      attr_reader :action_name, :request, :response, :performed
+      alias_method :performed?, :performed
+
+      def dispatch(**options)
+        rparams = route(**options)
+
+        raise WrongFunctionsRouteFormat, self.class.name unless rparams in { action: Symbol, params: Hash, **nil }
+
+        @action_name = rparams[:action]
+        @request = rparams[:params]
+        @response = {statusCode: nil, body: {}, headers: {}} # TODO: extract to separate module
+        @performed = false
 
         process(@action_name)
-      rescue => e
-        ActiveFunction::Logger.error(e)
-      ensure
+
         @response.to_h
+      end
+
+      def route(*)
+        raise NotImplementedError, "Please, define `route(event:, context:)` method!"
       end
 
       private
 
-      def process(action_name) = public_send(action_name)
+      def process(action_name)
+        public_send(action_name)
 
-      def response_body=(body)
-        @response.body = body
+        render unless performed?
+      end
 
-        @performed = true
+      module ClassMethods # :nodoc:
+        def handler(**options)
+          new.dispatch(**options)
+        end
       end
     end
   end

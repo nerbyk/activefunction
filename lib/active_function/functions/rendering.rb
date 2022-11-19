@@ -6,9 +6,9 @@ module ActiveFunction
       def render(*args)
         options = args.first || {}
 
-        rendered_body = render_to_body(options)
+        render_json(options)
 
-        self.response_body = rendered_body
+        @performed = true
       end
     end
   end
