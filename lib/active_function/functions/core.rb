@@ -1,28 +1,22 @@
 module ActiveFunction
   module Functions
     module Core
-      class << self
-        def self.dispatch(action_name, request, response)
-          new.dispatch(action_name, request, response)
-        end
-      end
-
+      EMPTY_HASH = {}.freeze
+      
+      def self.handler
+        new.dispatch(super, response = EMPTY_HASH)
+      end 
+      
       attr_reader :action_name, :request, :response
 
       def dispatch(env)
-        (@action_name, @request, @response) = env
+        [@action_name, @request, @response] => env
 
         process(@action_name)
       rescue => e
         ActiveFunction::Logger.error(e)
       ensure
         @response.to_h
-      end
-
-      protected
-
-      def route
-        raise NotImplementedError, "routing is not implemented under #{self.class.name} class"
       end
 
       private
