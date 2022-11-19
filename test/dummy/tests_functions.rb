@@ -1,43 +1,58 @@
 require "./config/boot"
+require "active_function"
 
-class TestsFunctions < ActiveFunction::Functions
-  @@tests = []
-  Test = Struct.new("Test", :id, :name, :last_executed_at)
 
-  PERMITED_PARAMS = %i[
-    id
-    name
-    last_executed_at
-  ]
+module Routing
+  API_ACTIONS = {
+    "GET": :index,
+    "POST": :create,
+    "DELETE": :destroy
+  }.freeze
 
-  before_action :tests_params, only: %i[get create]
-  before_action
-  # after_action
+  def handler(event:, context:)
+    case ActiveFunction::EventSource.call(event)
+    when ActiveFunction::EventSource::API_GATEWAY_AWS_PROXY  
+      { API_ACTIONS[event["httpMethod"]] => event["queryStringParameters"] }
+    when ActiveFunction::EventSource::DYNAMO_DB
+      { db_event: event["Records"] }
+    else 
+      raise "Unavailable event source"
+    end
+  end
+end
+class TestsFunctions < ActiveFunction::Base
+  extend ::Routing
 
-  def get
-    render json: @@tests.find { |t| t.id == tests_params[:id] }, status: 200
+  PERMITED_PARAMS = %i[id name last_executed_at].freeze
+
+  before_action :pre_message, only: %i[create]
+  after_action :post_message, only: %i[destroy]
+
+  def index
+    render json: { params: params }, status: 200
   end
 
   def create
-    test = Test.new(*tests_params.values)
-
-    @@tests.push test
-
-    render :json, test
-
-  rescue => err
-    render json: err, status: 500
+    render json: @message, status: 200
   end
 
   def destroy
-    @@tests.delete_if { |t| t.id == test_params[:id] }
+    render json: @message, status: 200
+  end
 
-    render json: 'ok', status: 200
+  def db_event
+
   end
 
   private
 
-  def tests_params
-    params.require(:data).permit(:id, :name, :last_executed_at)
+  def pre_message
+    @message = "Resource created"
+  end
+
+  def post_message
+    @message = "Resource destroyed"
   end
 end
+
+p TestsFunctions.handler(event: { "Records" => [{ "EventSource" => "aws:dynamodb" }] }, context: nil)
