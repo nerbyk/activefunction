@@ -1,3 +1,5 @@
+require "json"
+
 module ActiveFunction
   class WrongFunctionsRouteFormat < Error
     MESSAGE_TEMPLATE = "Wrong functions route wormat: %s, expected: { action: Symbol, params: Hash }"
@@ -49,6 +51,8 @@ module ActiveFunction
 
       module ClassMethods # :nodoc:
         def handler(**options)
+          options[:event] = JSON.parse(options[:event], symbolize_names: true)
+
           new.dispatch(**options)
         end
       end
