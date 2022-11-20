@@ -1,44 +1,53 @@
 module ActiveFunction
   class EventSource
     SOURCES = [
-      CLOUDFRONT = 'Cloudfront',
-      AWS_CONFIG = 'AwsConfig',
-      CODE_COMMIT = 'CodeCommit',
-      API_GATEWAY_AUTHORIZER = 'ApiGatewayAuthorizer',
-      CLOUD_FORMATION = 'CloudFormation',
-      SES = 'Ses',
-      API_GATEWAY_AWS_PROXY = 'ApiGatewayAwsProxy',
-      SCHEDULED_EVENT = 'ScheduledEvent',
-      CLOUD_WATCH_LOGS = 'CloudWatchLogs',
-      SNS = 'Sns',
-      DYNAMO_DB = 'DynamoDb',
-      KINESIS_FIREHOSE = 'KinesisFirehose',
-      COGNITO_SYNC_TRIGGER = 'CognitoSyncTrigger',
-      KINESIS = 'Kinesis',
-      S3 =  'S3',
-      MOBILE_BACKEND = 'MobileBackend',
-      SQS = 'Sqs'
+      CLOUDFRONT             = "Cloudfront",
+      AWS_CONFIG             = "AwsConfig",
+      CODE_COMMIT            = "CodeCommit",
+      API_GATEWAY_AUTHORIZER = "ApiGatewayAuthorizer",
+      CLOUD_FORMATION        = "CloudFormation",
+      SES                    = "Ses",
+      API_GATEWAY_AWS_PROXY  = "ApiGatewayAwsProxy",
+      SCHEDULED_EVENT        = "ScheduledEvent",
+      CLOUD_WATCH_LOGS       = "CloudWatchLogs",
+      SNS                    = "Sns",
+      DYNAMO_DB              = "DynamoDb",
+      KINESIS_FIREHOSE       = "KinesisFirehose",
+      COGNITO_SYNC_TRIGGER   = "CognitoSyncTrigger",
+      KINESIS                = "Kinesis",
+      S3                     = "S3",
+      MOBILE_BACKEND         = "MobileBackend",
+      SQS                    = "Sqs"
     ].freeze
+
+    RECORDS_EVENT_SOURCES = {
+      "aws:s3"         => S3,
+      "aws:dynamodb"   => DYNAMO_DB,
+      "aws:sqs"        => SQS,
+      "aws:codecommit" => CODE_COMMIT,
+      "aws:ses"        => SES,
+      "aws:sns"        => SNS,
+      "aws:kinesis"    => KINESIS
+    }.freeze
     
+    private_constant :RECORDS_EVENT_SOURCES
+
     def self.call(event)
-      return API_GATEWAY_AWS_PROXY  if event["pathParameters"] && event["pathParameters"]["proxy"]
-      return DYNAMO_DB              if event["Records"] && (event["Records"][0]["EventSource"] == 'aws:dynamodb')
-      return SQS                    if event["Records"] && event["Records"][0]["EventSource"] == 'aws:sqs'
-      return CLOUD_WATCH_LOGS       if event["awslogs"] && event["awslogs"]["data"]
-      return CLOUDFRONT             if event["Records"] && event["Records"][0]["cf"]
-      return S3                     if event["Records"] && event["Records"][0]["EventSource"] == 'aws:s3'
-      return CLOUD_FORMATION        if event["StackId"] && event["RequestType"] && event["ResourceType"]
-      return SCHEDULED_EVENT        if event["source"] == 'aws.events'
-      return API_GATEWAY_AUTHORIZER if event["authorizationToken"] == "incoming-client-token"
-      return AWS_CONFIG             if event["configRuleId"] && event["configRuleName"] && event["configRuleArn"]
-      return CODE_COMMIT            if event["Records"] && (event["Records"][0]["eventSource"] == 'aws:codecommit')
-      return SES                    if event["Records"] && (event["Records"][0]["EventSource"] == 'aws:ses')
-      return SNS                    if event["Records"] && (event["Records"][0]["EventSource"] == 'aws:sns')
-      return KINESIS_FIREHOSE       if event["Records"] && event["Records"][0]["approximateArrivalTimestamp"]
-      return KINESIS_FIREHOSE       if event["Records"] && event["deliveryStreamArn"] && event["deliveryStreamArn"].start_with?('arn:aws:kinesis:')
-      return COGNITO_SYNC_TRIGGER   if event["eventType"] == 'SyncTrigger' && event["identityId"] && event["identityPoolId"]
-      return KINESIS                if event["Records"] && event["Records"][0]["EventSource"] == 'aws:kinesis'
-      return MOBILE_BACKEND         if event["operation"] && event["message"]
+      case event
+        in Records: [{ eventSource:_ }, *], ** then RECORDS_EVENT_SOURCES[event[:Records][0][:eventSource]]
+        in Records: [{cf:_ }, *], ** then CLOUDFRONT
+        in { Records: [{ approximateArrivalTimestamp: _ }, *], ** } | { deliveryStreamArn: /\Aarn:aws:kinesis:/, **} then KINESIS_FIREHOSE
+        in pathParameters: { proxy: String } then API_GATEWAY_AWS_PROXY
+        in awslogs: { data: String } then CLOUD_WATCH_LOGS
+        in StackId:_, RequestType:_, ResourceType:_, ** then CLOUD_FORMATION
+        in source: "aws.events", ** then SCHEDULED_EVENT
+        in authorizationToken: "incoming-client-token", ** then API_GATEWAY_AUTHORIZER
+        in configRuleId:_, configRuleName:_, configRuleArn:_, ** then AWS_CONFIG
+        in eventType: "SyncTrigger", identityId:_, identityPoolId:_, ** then COGNITO_SYNC_TRIGGER
+        in operation:_, message:_, ** then MOBILE_BACKEND
+      else 
+        raise ArgumentError, "Unknown event source"
+      end
     end
   end
 end
