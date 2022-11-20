@@ -13,7 +13,7 @@ module Routing
     when ActiveFunction::EventSource::API_GATEWAY_AWS_PROXY
       {action: API_ACTIONS[event["httpMethod"]], params: event["queryStringParameters"]}
     when ActiveFunction::EventSource::DYNAMO_DB
-      {action: :db_event, params: event.slice("Records")}
+      {action: :db_event, params: event.slice(:Records)}
     else
       raise "Unavailable event source"
     end
@@ -41,7 +41,7 @@ class TestsFunctions < ActiveFunction::Base
   end
 
   def db_event
-    render json: {params: params.require("Records")}, status: 200
+    render json: params.require(:Records), status: 200
   end
 
   private
@@ -55,4 +55,5 @@ class TestsFunctions < ActiveFunction::Base
   end
 end
 
-p TestsFunctions.handler(event: {"Records" => [{"EventSource" => "aws:dynamodb"}]}, context: nil)
+event = File.read("../fixtures/aws_events/dynamodb.json")
+p TestsFunctions.handler(event: event, context: nil)
