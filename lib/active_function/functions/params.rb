@@ -14,9 +14,7 @@ module ActiveFunction
   module Functions
     module Params
       def params
-        return @params if instance_variable_defined?(:@params)
-
-        @params = Parameters.new @request
+        @params ||= Parameters.new(@event)
       end
 
       class Parameters
@@ -43,8 +41,6 @@ module ActiveFunction
 
         def present?
           @params.any?
-
-          self
         end
       end
     end

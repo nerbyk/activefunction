@@ -1,6 +1,5 @@
 target :lib do
   signature "sig"
-  check "lib"
-  ignore "test/**/*.rb"
-  library "set"
+
+  check "sig/types" # check only public API
 end

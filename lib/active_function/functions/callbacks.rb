@@ -13,66 +13,60 @@ module ActiveFunction
 
   module Functions
     module Callbacks # :nodoc:
+      TYPES = [
+        BEFORE = :before,
+        AFTER  = :after
+      ].freeze
+
       class << self
         def included(base)
           base.extend(ClassMethods)
         end
       end
-
-      def process(*)
-        run_callbacks do
-          super
-        end
-      end
-
+      
       private
 
-      def run_callbacks
-        exec_callbacks(:before)
-
-        yield if block_given?
-
-        exec_callbacks(:after)
+      def process(*)
+        run_callbacks { super }
       end
 
-      def exec_callbacks(type)
-        self.class.callbacks[type].each do |callback_method, filters|
+      def run_callbacks(&block)
+        exec BEFORE
+
+        yield
+
+        exec AFTER
+      end
+
+
+      def exec(type)
+        self.class.callbacks[type].each do |callback_method, options|
           raise MissingCallbackContext, callback_method unless respond_to?(callback_method, true)
-          
-          send(callback_method) if filters[:if][action_name]
+
+          send(callback_method) if executable?(options)
         end
+      end
+
+      def executable?(options)
+        return false unless options[:only]&.include?(@route)
+        return false unless options[:if] && send(options[:if])
+        true
       end
 
       module ClassMethods # :nodoc:
-        CALLBACKS = {before: {}, after: {}}.freeze
+        DEFAULT_CALLBACK = Hash[TYPES.product([{}]).to_h].freeze
 
-        def before_action(method_name, **options)
-          set_callback(:before, method_name, filter(options))
-        end
-
-        def after_action(method_name, **options)
-          set_callback(:after, method_name, filter(options))
+        TYPES.each do |callback|
+          define_method(:"#{callback}_action") do |method, options = {}|
+            callbacks[callback][method] = options
+          end
         end
 
         def callbacks
-          return @callbacks if instance_variable_defined?(:@callbacks)
+          return @_callbacks if instance_variable_defined?(:@callbacks)
 
-          @callbacks = CALLBACKS
+          @_callbacks = Hash[DEFAULT_CALLBACK]
         end
-
-        def filter(options)
-          if only_list = options[:only]
-            options[:if] = proc { |action| only_list.map(&:to_s).include?(action) }
-          end
-
-          options
-        end
-
-        def set_callback(type, method_name, filters)
-          callbacks[type][method_name] = filters
-        end
-
-        private :filter, :set_callback
       end
     end
   end
