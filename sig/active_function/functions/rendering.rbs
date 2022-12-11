@@ -1,5 +1,0 @@
-module ActiveFunction::Functions
-  module Rendering
-    def render: (Options) -> nil
-  end 
-end 
