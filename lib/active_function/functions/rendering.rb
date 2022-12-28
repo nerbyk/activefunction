@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "json"
+
 module ActiveFunction
   class DoubleRenderError < Error
     MESSAGE_TEMPLATE = "render was called multiple times in %s action."

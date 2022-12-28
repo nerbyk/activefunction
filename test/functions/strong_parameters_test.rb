@@ -1,15 +1,15 @@
-require 'test_helper'
+require "test_helper"
 
 describe ActiveFunction::Functions::StrongParameters do
   let(:described_class) { ActiveFunction::Functions::StrongParameters }
 
   def set_params(**options)
-    described_class.instance_method(:params).bind(self).call(options)
+    described_class.instance_method(:params).bind_call(self, options)
   end
 
   describe "#params" do
     it "returns a new instance of the Parameters class" do
-      strong_params = set_params(id: 1, user: { name: "John" })
+      strong_params = set_params(id: 1, user: {name: "John"})
       assert_instance_of ActiveFunction::Functions::StrongParameters::Parameters, strong_params
     end
   end
@@ -29,14 +29,14 @@ describe ActiveFunction::Functions::StrongParameters do
       end
 
       it "returns Parameter instance if the parameter is a hash" do
-        params = described_class.new({user: {name: "Pupa"}})
+        params        = described_class.new({user: {name: "Pupa"}})
         nested_params = params[:user]
 
         assert_instance_of described_class, nested_params
       end
 
       it "returns array of Parameter instances if the parameter is an array of hashes" do
-        params = described_class.new({users: [{name: "Pupa"}, {name: "Lupa"}]})
+        params        = described_class.new({users: [{name: "Pupa"}, {name: "Lupa"}]})
         nested_params = params[:users]
 
         assert_instance_of Array, nested_params
@@ -45,13 +45,13 @@ describe ActiveFunction::Functions::StrongParameters do
       end
 
       it "returns the value of the nested parameter when it exists" do
-        params = described_class.new({user: { name: "Pupa" }})
+        params = described_class.new({user: {name: "Pupa"}})
 
         assert_nested_params({name: "Pupa"}, params[:user])
       end
 
       it "returns nested parameters when they exist" do
-        params = described_class.new({user: { name: "Pupa" }})
+        params        = described_class.new({user: {name: "Pupa"}})
         nested_params = params[:user][:name]
 
         assert_equal "Pupa", nested_params
@@ -69,7 +69,7 @@ describe ActiveFunction::Functions::StrongParameters do
         assert_nil params[:user][:name]
       end
     end
-    
+
     describe "#require" do
       it "returns the value of the parameter when it exists" do
         params = described_class.new({name: "Pupa"})
@@ -78,14 +78,14 @@ describe ActiveFunction::Functions::StrongParameters do
       end
 
       it "returns Parameter instance if the parameter is a hash" do
-        params = described_class.new({user: {name: "Pupa"}})
+        params          = described_class.new({user: {name: "Pupa"}})
         required_params = params.require(:user)
 
         assert_instance_of described_class, required_params
       end
 
       it "returns array of Parameter instances if the parameter is an array of hashes" do
-        params = described_class.new({users: [{name: "Pupa"}, {name: "Lupa"}]})
+        params          = described_class.new({users: [{name: "Pupa"}, {name: "Lupa"}]})
         required_params = params.require(:users)
 
         assert_instance_of Array, required_params
@@ -94,13 +94,13 @@ describe ActiveFunction::Functions::StrongParameters do
       end
 
       it "returns the value of the nested parameter when it exists" do
-        params = described_class.new({user: { name: "Pupa" }})
+        params = described_class.new({user: {name: "Pupa"}})
 
         assert_nested_params({name: "Pupa"}, params.require(:user))
       end
 
       it "returns nested parameters when they exist" do
-        params = described_class.new({user: { name: "Pupa" }})
+        params          = described_class.new({user: {name: "Pupa"}})
         required_params = params.require(:user).require(:name)
 
         assert_equal "Pupa", required_params
@@ -115,16 +115,16 @@ describe ActiveFunction::Functions::StrongParameters do
 
     describe "#permit" do
       it "returns new Parameters instance with permitted parameters" do
-        params = described_class.new({id: 1, name: "Pupa"})
+        params           = described_class.new({id: 1, name: "Pupa"})
         permitted_params = params.permit(:id, :name)
 
         assert_instance_of described_class, permitted_params
         assert_equal true, permitted_params.instance_variable_get(:@permitted)
-        assert_nested_params({ id: 1, name: "Pupa" }, permitted_params)
+        assert_nested_params({id: 1, name: "Pupa"}, permitted_params)
       end
 
       it "returns new Parameters instances with permitted nested parameters" do
-        params = described_class.new({user: {name: "Pupa", roles: [{id: 1, name: "Admin"}]}})
+        params           = described_class.new({user: {name: "Pupa", roles: [{id: 1, name: "Admin"}]}})
         permitted_params = params.permit(user: [:name, roles: [:id, :name]])
 
         assert_instance_of described_class, permitted_params
@@ -137,11 +137,11 @@ describe ActiveFunction::Functions::StrongParameters do
       end
 
       it "returns new Parameters instance with valid values in nested parameters" do
-        params = described_class.new({user: {name: "Pupa", roles: [{id: 1, name: "Admin"}]}})
+        params           = described_class.new({user: {name: "Pupa", roles: [{id: 1, name: "Admin"}]}})
         permitted_params = params.permit(user: [:name, roles: [:id, :name]])
 
         assert_equal "Pupa", permitted_params[:user][:name]
-        assert_nested_params({ id: 1, name: "Admin"}, permitted_params[:user][:roles][0])
+        assert_nested_params({id: 1, name: "Admin"}, permitted_params[:user][:roles][0])
       end
 
       it "ignores parameter when the it does not exist" do
@@ -151,7 +151,7 @@ describe ActiveFunction::Functions::StrongParameters do
       end
 
       it "ignores nested parameter when the it does not exist" do
-        params = described_class.new({user: {}})
+        params           = described_class.new({user: {}})
         permitted_params = params.permit(user: [:name])
 
         assert_nested_params({}, permitted_params[:user])
@@ -160,31 +160,31 @@ describe ActiveFunction::Functions::StrongParameters do
 
     describe "#to_h" do
       it "returns hash with permitted parameters" do
-        params = described_class.new({id: 1, name: "Pupa"})
+        params           = described_class.new({id: 1, name: "Pupa"})
         permitted_params = params.permit(:id, :name)
 
-        assert_equal({ id: 1, name: "Pupa" }, permitted_params.to_h)
+        assert_equal({id: 1, name: "Pupa"}, permitted_params.to_h)
       end
 
       it "returns hash with permitted nested parameters" do
-        params = described_class.new({user: {name: "Pupa", roles: [{name: "Admin"}]}})
+        params           = described_class.new({user: {name: "Pupa", roles: [{name: "Admin"}]}})
         permitted_params = params.permit(user: [:name, roles: [:id, :name]])
 
-        assert_equal({ user: { name: "Pupa", roles: [{ name: "Admin" }] } }, permitted_params.to_h)
+        assert_equal({user: {name: "Pupa", roles: [{name: "Admin"}]}}, permitted_params.to_h)
       end
 
       it "returns hash with permitted nested parameters when the parameter is an array of hashes" do
-        params = described_class.new({users: [{id: 1, name: "Pupa"}, {id:2, name: "Lupa"}]})
+        params           = described_class.new({users: [{id: 1, name: "Pupa"}, {id:2, name: "Lupa"}]})
         permitted_params = params.permit(users: [:name])
 
-        assert_equal({ users: [{ name: "Pupa" }, { name: "Lupa" }] }, permitted_params.to_h)
+        assert_equal({users: [{name: "Pupa"}, {name: "Lupa"}]}, permitted_params.to_h)
       end
 
       it "returns hash with permitted nested parameters when the parameter is an array of hashes with nested parameters" do
-        params = described_class.new({users: [{name: "Pupa", roles: [{id: 1, name: "Admin"}]}, {name: "Lupa", roles: [{id: 2, name: "User"}]}]})
+        params           = described_class.new({users: [{name: "Pupa", roles: [{id: 1, name: "Admin"}]}, {name: "Lupa", roles: [{id: 2, name: "User"}]}]})
         permitted_params = params.permit(users: [:name, roles: [:name]])
 
-        assert_equal({ users: [{ name: "Pupa", roles: [{ name: "Admin" }] }, { name: "Lupa", roles: [{ name: "User" }] }] }, permitted_params.to_h)
+        assert_equal({users: [{name: "Pupa", roles: [{name: "Admin"}]}, {name: "Lupa", roles: [{name: "User"}]}]}, permitted_params.to_h)
       end
 
       # test UnpermittedParameterError case when the parameter is an array of hashes with nested parameters

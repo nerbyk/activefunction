@@ -39,7 +39,7 @@ module ActiveFunction
       in authorizationToken: "incoming-client-token", ** then API_GATEWAY_AUTHORIZER
       in configRuleId:_, configRuleName:_, configRuleArn:_, ** then AWS_CONFIG
       in eventType: "SyncTrigger", identityId:_, identityPoolId:_, ** then COGNITO_SYNC_TRIGGER
-      else 
+      else
         raise ArgumentError, "Unknown event source"
       end
     end
