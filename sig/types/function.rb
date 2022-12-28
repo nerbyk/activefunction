@@ -1,16 +1,14 @@
 require "active_function"
 
+ROUTES = {
+  /GET/  => :index,
+  /POST/ => :db_event
+}.freeze
+
 module RBS; end
 
 class RBS::Function < ActiveFunction::Base
-  ROUTE = {
-    ActiveFunction::EventSource::CLOUD_WATCH_LOGS => :index,
-    ActiveFunction::EventSource::DYNAMO_DB        => :db_event
-  }
-
-  def route
-    ROUTE.dig(::ActiveFunction::EventSource.call(event))
-  end
+  def route = ROUTES.fetch event[:requestContext][:http][:method]
 
   before_action :before_action, only: :index
   after_action :after_action, if: :after_action?

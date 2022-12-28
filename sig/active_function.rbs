@@ -4,7 +4,7 @@ module ActiveFunction
     | dynamoDBEvent
     | s3Event
     | sqsEvent
-    | apiGatewayHttpEvent
+    | apiGatewayV2HTTPEvent
     | codeCommitEvent
     | kinesisEvent
     | sesEvent
@@ -23,29 +23,6 @@ module ActiveFunction
   end
 
   class WrongFunctionsRouteFormat < Error
-  end
-
-  class EventSource
-    SOURCES: Array[String]
-
-    AWS_CONFIG: String
-    CODE_COMMIT: String
-    API_GATEWAY_AUTHORIZER: String
-    API_GATEWAY_HTTP: String
-    CLOUD_FORMATION: String
-    SES: String
-    CLOUD_WATCH_LOGS: String
-    SNS: String
-    DYNAMO_DB: String
-    KINESIS_FIREHOSE: String
-    COGNITO_SYNC_TRIGGER: String
-    KINESIS: String
-    S3: String
-    SQS: String
-
-    RECORDS_EVENT_SOURCES: Hash[String, String]
-
-    def self.call: (event event) -> String
   end
 
   class Base
