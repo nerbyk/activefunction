@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "forwardable"
+
 module ActiveFunction
   class ParameterMissingError < Error
     MESSAGE_TEMPLATE = "Missing parameter: %s"
@@ -28,6 +30,10 @@ module ActiveFunction
       end
 
       class Parameters
+        extend Forwardable
+        def_delegators :@parameters, :each, :map
+        include Enumerable
+
         def initialize(parameters, permitted: false)
           @parameters = parameters
           @permitted  = permitted

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "active_function"
 
 ROUTES = {
@@ -8,7 +10,7 @@ ROUTES = {
 module RBS; end
 
 class RBS::Function < ActiveFunction::Base
-  def route = ROUTES.fetch event[:requestContext][:http][:method]
+  def route = ROUTES.fetch(event[:requestContext][:http][:method])
 
   before_action :before_action, only: :index
   after_action :after_action, if: :after_action?
@@ -20,9 +22,11 @@ class RBS::Function < ActiveFunction::Base
   end
 
   def db_event
-    params.require(:Records).each do |record|
-      record.permit(:dynamodb).require(:NewImage).permit(:id, :name, :last_executed_at).to_h
-    end
+    ids = params
+      .require(:Records)
+      .map { |r| r.require(:dynamodb).require(:Keys).permit(Id: :N).to_h }
+
+    render json: ids, status: 200
   end
 
   private

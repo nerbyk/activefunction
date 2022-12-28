@@ -100,7 +100,7 @@ module ActiveFunction
     end
 
     module StrongParameters
-      def params: (hash parameters) -> Parameters
+      def params: (?hash parameters) -> Parameters
 
       class Parameters
         @parameters: hash

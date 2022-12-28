@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 describe ActiveFunction::Functions::StrongParameters do
@@ -11,6 +13,16 @@ describe ActiveFunction::Functions::StrongParameters do
     it "returns a new instance of the Parameters class" do
       strong_params = set_params(id: 1, user: {name: "John"})
       assert_instance_of ActiveFunction::Functions::StrongParameters::Parameters, strong_params
+    end
+
+    it "returns hash of ids from event.Records.Keys.Id.N" do
+      event         = File.read("test/fixtures/aws_events/dynamodb.json")
+      strong_params = set_params(**JSON.parse(event, symbolize_names: true))
+      records       = strong_params
+        .require(:Records)
+        .map { |r| r.require(:dynamodb).require(:Keys).permit(Id: :N).to_h }
+
+      assert_equal [{Id: {N: "101"}}, {Id: {N: "101"}}], records
     end
   end
 

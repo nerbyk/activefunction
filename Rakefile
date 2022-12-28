@@ -2,7 +2,7 @@
 
 require "bundler/gem_tasks"
 require "rake/testtask"
- 
+
 Rake::TestTask.new do |t|
   t.libs << "test"
   t.libs << "lib"
@@ -13,9 +13,7 @@ end
 
 begin
   require "rubocop/rake_task"
-  RuboCop::RakeTask.new do |t|
-    t.options = ["-a"]
-  end
+  RuboCop::RakeTask.new
 rescue LoadError
   task(:rubocop) {}
 end
@@ -33,6 +31,11 @@ namespace :steep do
   task :stats do
     exec "bundle exec steep stats --log-level=fatal --format=table'"
   end
+end
+
+desc "Run Ruby Next nextify"
+task :nextify do
+  sh "bundle exec ruby-next nextify -V"
 end
 
 task default: %i[test rubocop steep]

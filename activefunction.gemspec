@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.license = "MIT"
 
   spec.files                 = Dir.glob("lib/**/*") + Dir.glob("lib/.rbnext/**/*") +
-    Dir.glob("bin/**/*") + %w[sig/anyway_config.rbs sig/manifest.yml] +
+    Dir.glob("bin/**/*") + %w[sig/active_function.rbs sig/manifest.yml] +
     %w[README.md LICENSE.txt CHANGELOG.md]
   spec.require_paths         = ["lib"]
   spec.required_ruby_version = ">= 2.6"
