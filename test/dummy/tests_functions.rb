@@ -3,17 +3,15 @@ require "active_function"
 
 module Routing
   API_ACTIONS = {
-    GET: :index,
-    POST: :create,
-    DELETE: :destroy
+    "GET"    => :index,
+    "POST"   => :create,
+    "DELETE" => :destroy
   }.freeze
 
-  def route(event:, context:)
+  def route
     case ActiveFunction::EventSource.call(event)
-    when ActiveFunction::EventSource::API_GATEWAY_AWS_PROXY
-      {action: API_ACTIONS[event["httpMethod"]], params: event["queryStringParameters"]}
-    when ActiveFunction::EventSource::DYNAMO_DB
-      {action: :db_event, params: event.slice(:Records)}
+    when ActiveFunction::EventSource::API_GATEWAY_HTTP then API_ACTIONS[event[:httpMethod]]
+    when ActiveFunction::EventSource::DYNAMO_DB then :db_event
     else
       raise "Unavailable event source"
     end
@@ -25,11 +23,12 @@ class TestsFunctions < ActiveFunction::Base
 
   PERMITED_PARAMS = %i[id name last_executed_at].freeze
 
-  before_action :pre_message, only: %i[create]
+  before_action :pre_message, if: :if_action, only: [:index]
   after_action :post_message, only: %i[destroy]
 
   def index
-    render json: {params: params}, status: 200
+    binding.irb
+    render json: {params: params }, status: 200
   end
 
   def create
@@ -53,7 +52,12 @@ class TestsFunctions < ActiveFunction::Base
   def post_message
     @message = "Resource destroyed"
   end
+
+  def if_action
+    false
+  end
 end
 
-event = File.read("../fixtures/aws_events/dynamodb.json")
-p TestsFunctions.handler(event: event, context: nil)
+# dynamodb_event = File.read("../fixtures/aws_events/dynamodb.json")
+api_gateway_http_event = File.read("../fixtures/aws_events/dynamodb.json")
+p TestsFunctions.handler(event: api_gateway_http_event, context: nil)
