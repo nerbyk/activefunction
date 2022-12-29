@@ -5,6 +5,7 @@ module ActiveFunctionHelper
     def initialize(route = nil)
       @route     = route
       @performed = false
+      @response  = {}
     end
 
     private def process
@@ -16,6 +17,13 @@ module ActiveFunctionHelper
     Class.new do
       include FunctionCore
       include ActiveFunction::Functions::Callbacks
+    end
+  end
+
+  def function_with_render
+    Class.new do
+      include FunctionCore
+      include ActiveFunction::Functions::Rendering
     end
   end
 end
