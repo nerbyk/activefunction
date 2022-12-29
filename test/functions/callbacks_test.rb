@@ -1,66 +1,78 @@
 # frozen_string_literal: true
-# # frozen_string_literal: true
 
-# require "test_helper"
+require "test_helper"
 
-# describe ActiveFunction::Functions::Callbacks do
-#   let(:described_class) { ActiveFunction::Functions::Callbacks }
+describe ActiveFunction::Functions::Callbacks do
+  describe "#process" do
+    let(:function_class) { function_with_callbacks }
+    let(:route) { :index }
+    let(:function) { function_class.new(route) }
 
-#   before(:each) do
-#     @test_class = Class.new do
-#       include ActiveFunction::Functions::Callbacks
+    it "should call callbacks" do
+      function_class.class_eval do
+        before_action :first
+        after_action :second
+        def first = @first = "Biba"
 
-#       # private
+        def second = @second = "Boba"
+      end
 
-#       # def test_method
-#       # end
+      function.send(:process)
 
-#       # def test_method2
-#       # end
-#     end
-#   end
+      assert function.instance_variable_get(:@performed), true
+      assert function.instance_variable_get(:@first), "Biba"
+      assert function.instance_variable_get(:@second), "Boba"
+    end
+    it "should call several callbacks of the same type" do
+      function_class.class_eval do
+        before_action :first
+        before_action :second
+        def first = @first = "Biba"
 
-#   describe "#(before|after)_action" do
-#     it "adds a callback" do
-#       @test_class.before_action :test_method
+        def second = @second = "Boba"
+      end
 
-#       assert_includes @test_class.callbacks[:before], :test_method
-#     end
+      function.send(:process)
 
-#     it "adds a before callback with options" do
-#       @test_class.after_action :test_method, only: :index, if: :test?
+      assert function.instance_variable_get(:@performed), true
+      assert function.instance_variable_get(:@first), "Biba"
+      assert function.instance_variable_get(:@second), "Boba"
+    end
 
-#       assert_includes @test_class.callbacks[:after], :test_method
-#       assert_equal({only: :index, if: :test?}, @test_class.callbacks[:after][:test_method])
-#     end
+    it "should call conditional callbacks" do
+      function_class.class_eval do
+        before_action :first, if: :condition
+        after_action :second, if: :condition2
+        def first  = @first = "Biba"
 
-#     it "adds multiple before callbacks" do
-#       @test_class.before_action :test_method
-#       @test_class.after_action :test_method2
+        def second = @second = "Boba"
 
-#       assert_includes @test_class.callbacks[:before], :test_method
-#       assert_includes @test_class.callbacks[:after], :test_method2
-#     end
+        def condition  = true
 
-#     it "adds multiple before callbacks with options" do
-#       @test_class.before_action :test_method, only: :index
-#       @test_class.after_action :test_method2, if: :test?
+        def condition2 = false
+      end
 
-#       assert_includes @test_class.callbacks[:before], :test_method
-#       assert_includes @test_class.callbacks[:after], :test_method2
-#       assert_equal({only: :index}, @test_class.callbacks[:before][:test_method])
-#       assert_equal({if: :test?}, @test_class.callbacks[:after][:test_method2])
-#     end
-#   end
+      function.send(:process)
 
-#   describe "#run_callbacks" do
-#     it "runs the callbacks" do
-#       mock = MiniTest::Mock.new
-#       mock.expect :test_method, true
-#       mock.expect :test_method2, true
+      assert function.instance_variable_get(:@performed), true
+      assert function.instance_variable_get(:@first), "Biba"
+      assert_nil function.instance_variable_get(:@second)
+    end
 
-#       @test_class.before_action :test_method
-#       @test_class.after_action :test_method2
-#     end
-#   end
-# end
+    it "should call callbacks with only option" do
+      function_class.class_eval do
+        before_action :first, only: %i[index]
+        after_action :second, only: %i[show]
+        def first  = @first = "Biba"
+
+        def second = @second = "Boba"
+      end
+
+      function.send(:process)
+
+      assert function.instance_variable_get(:@performed), true
+      assert function.instance_variable_get(:@first), "Biba"
+      assert_nil function.instance_variable_get(:@second)
+    end
+  end
+end
