@@ -4,7 +4,7 @@ module ActiveFunction
     | dynamoDBEvent
     | s3Event
     | sqsEvent
-    | apiGatewayHttpEvent
+    | apiGatewayV2HTTPEvent
     | codeCommitEvent
     | kinesisEvent
     | sesEvent
@@ -25,35 +25,12 @@ module ActiveFunction
   class WrongFunctionsRouteFormat < Error
   end
 
-  class EventSource
-    SOURCES: Array[String]
-
-    AWS_CONFIG: String
-    CODE_COMMIT: String
-    API_GATEWAY_AUTHORIZER: String
-    API_GATEWAY_HTTP: String
-    CLOUD_FORMATION: String
-    SES: String
-    CLOUD_WATCH_LOGS: String
-    SNS: String
-    DYNAMO_DB: String
-    KINESIS_FIREHOSE: String
-    COGNITO_SYNC_TRIGGER: String
-    KINESIS: String
-    S3: String
-    SQS: String
-
-    RECORDS_EVENT_SOURCES: Hash[String, String]
-
-    def self.call: (event event) -> String
-  end
-
   class Base
     include ActiveFunction::Functions::Core
     extend ActiveFunction::Functions::Core::ClassMethods
     include ActiveFunction::Functions::Callbacks
     extend ActiveFunction::Functions::Callbacks::ClassMethods
-    include ActiveFunction::Functions::Params
+    include ActiveFunction::Functions::StrongParameters
     include ActiveFunction::Functions::Rendering
   end
 
@@ -122,8 +99,8 @@ module ActiveFunction
         ) -> void
     end
 
-    module Params
-      attr_reader params: Parameters
+    module StrongParameters
+      def params: (?hash parameters) -> Parameters
 
       class Parameters
         @parameters: hash
@@ -131,7 +108,7 @@ module ActiveFunction
 
         def initialize: (hash parameters, ?permitted: bool) -> void
         def []: (Symbol key) -> (Parameters | Array[Parameters] | untyped)
-        def require: (Symbol attribute) -> (Parameters | Array[Parameters] | untyped)
+        def require: (Symbol attribute) -> (Parameters | Array[Parameters])
         def permit: (*Symbol attribute) -> Parameters
 
         private

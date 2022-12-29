@@ -23,7 +23,7 @@ module ActiveFunction
           base.extend(ClassMethods)
         end
       end
-      
+
       private
 
       def process(*)
@@ -37,7 +37,6 @@ module ActiveFunction
 
         exec AFTER
       end
-
 
       def exec(type)
         self.class.callbacks[type].each do |callback_method, options|

@@ -10,5 +10,4 @@ module ActiveFunction # :nodoc:
 
   require "active_function/version"
   require "active_function/base"
-  require "active_function/event_source"
 end

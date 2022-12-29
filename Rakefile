@@ -3,10 +3,12 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
 
-Rake::TestTask.new(:test) do |t|
+Rake::TestTask.new do |t|
   t.libs << "test"
   t.libs << "lib"
-  t.test_files = FileList["test/**/test_*.rb"]
+  t.test_files = FileList["test/**/*_test.rb"]
+  t.warning    = false
+  t.verbose    = true
 end
 
 begin
@@ -29,6 +31,11 @@ namespace :steep do
   task :stats do
     exec "bundle exec steep stats --log-level=fatal --format=table'"
   end
+end
+
+desc "Run Ruby Next nextify"
+task :nextify do
+  sh "bundle exec ruby-next nextify -V"
 end
 
 task default: %i[test rubocop steep]

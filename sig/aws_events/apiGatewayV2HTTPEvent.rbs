@@ -1,0 +1,81 @@
+type apiGatewayV2HTTPEvent = {
+  version: String,
+  routeKey: String,
+  rawPath: String,
+  rawQueryString: String,
+  cookies: Array[String],
+  headers: Hash[Symbol, String],
+  queryStringParameters: Hash[Symbol, String],
+  pathParameters: Hash[Symbol, String],
+  requestContext: apiGatewayV2HTTPRequestContext,
+  stageVariables: Hash[Symbol, String],
+  body: String,
+  isBase64Encoded: bool
+}
+
+type apiGatewayV2HTTPRequestContext = {
+  accountId: String,
+  apiId: String,
+  domainName: String,
+  domainPrefix: String,
+  requestId: String,
+  routeKey: String,
+  stage: String,
+  time: String,
+  timeEpoch: Integer,
+  authorizer: apiGatewayV2HTTPRequestContextAuthorizer,
+  http: apiGatewayV2HTTPRequestContextHTTP,
+  authentication: apiGatewayV2HTTPRequestContextAuthentication,
+}
+
+type apiGatewayV2HTTPRequestContextAuthorizer = {
+  jwt: apiGatewayV2HTTPRequestContextAuthorizerJWT,
+  lambda: Hash[Symbol, String],
+  iam: apiGatewayV2HTTPRequestContextAuthorizerIAM,
+}
+
+type apiGatewayV2HTTPRequestContextAuthorizerJWT = {
+  claims: Hash[Symbol, String],
+  scopes: Array[String],
+}
+
+
+type apiGatewayV2HTTPRequestContextAuthorizerIAM = {
+  accessKey: String,
+  accountId: String,
+  callerId: String,
+  cognitoIdentity: apiGatewayV2HTTPRequestContextAuthorizerIAMCognitoIdentity,
+  principalOrgId: String,
+  userId: String,
+  userArn: String,
+}
+
+type apiGatewayV2HTTPRequestContextAuthorizerIAMCognitoIdentity = {
+  identityId: String,
+  identityPoolId: String,
+}
+
+type apiGatewayV2HTTPRequestContextHTTP = {
+  method: String,
+  path: String,
+  protocol: String,
+  sourceIp: String,
+  userAgent: String,
+}
+
+type apiGatewayV2HTTPRequestContextAuthentication = {
+  clientCerts: apiGatewayV2HTTPRequestContextAuthenticationClientCert
+}
+
+type apiGatewayV2HTTPRequestContextAuthenticationClientCert = {
+  clientCertPem: String,
+  subjectDN: String,
+  issuerDN: String,
+  serialNumber: String,
+  validity: apiGatewayV2HTTPRequestContextAuthenticationClientCertValidity,
+}
+
+type apiGatewayV2HTTPRequestContextAuthenticationClientCertValidity = {
+  notBefore: String,
+  notAfter: String,
+}
