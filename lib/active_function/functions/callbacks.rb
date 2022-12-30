@@ -47,8 +47,8 @@ module ActiveFunction
       end
 
       def executable?(options)
-        return false unless options[:only]&.include?(@route)
-        return false unless options[:if] && send(options[:if])
+        return false if options[:only] && !options[:only]&.include?(@route)
+        return false if options[:if] && !send(options[:if])
         true
       end
 
