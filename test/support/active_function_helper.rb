@@ -26,6 +26,13 @@ module ActiveFunctionHelper
       include ActiveFunction::Functions::Rendering
     end
   end
+
+  def function_with_core
+    Class.new do
+      include ActiveFunction::Functions::Core
+      include ActiveFunction::Functions::Rendering
+    end
+  end
 end
 
 Minitest::Test.include ActiveFunctionHelper
