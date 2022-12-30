@@ -4,7 +4,7 @@ require "test_helper"
 require "json"
 
 describe ActiveFunction::Functions::Core do
-  let(:function_class) { Class.new(function_with_core) { def route = :index } }
+  let(:function_class) { Class.new(function_with_core) { def route; :index; end } } # rubocop:disable Style/SingleLineMethods
   let(:function) { function_class.new(event: event.to_json, context: nil) }
   let(:event) { {a: 1, b: 2} }
 

@@ -3,6 +3,7 @@
 require "test_helper"
 
 describe ActiveFunction::Functions::Callbacks do
+  # rubocop:disable Style/SingleLineMethods
   describe "#process" do
     let(:function_class) { function_with_callbacks }
     let(:route) { :index }
@@ -12,9 +13,9 @@ describe ActiveFunction::Functions::Callbacks do
       function_class.class_eval do
         before_action :first
         after_action :second
-        def first = @first = "Biba"
+        def first; @first = "Biba"; end
 
-        def second = @second = "Boba"
+        def second; @second = "Boba"; end
       end
 
       function.send(:process)
@@ -27,9 +28,9 @@ describe ActiveFunction::Functions::Callbacks do
       function_class.class_eval do
         before_action :first
         before_action :second
-        def first = @first = "Biba"
+        def first; @first = "Biba"; end
 
-        def second = @second = "Boba"
+        def second; @second = "Boba"; end
       end
 
       function.send(:process)
@@ -43,13 +44,13 @@ describe ActiveFunction::Functions::Callbacks do
       function_class.class_eval do
         before_action :first, if: :condition
         after_action :second, if: :condition2
-        def first  = @first = "Biba"
+        def first; @first = "Biba"; end
 
-        def second = @second = "Boba"
+        def second; @second = "Boba"; end
 
-        def condition  = true
+        def condition; true; end
 
-        def condition2 = false
+        def condition2; false; end
       end
 
       function.send(:process)
@@ -63,9 +64,9 @@ describe ActiveFunction::Functions::Callbacks do
       function_class.class_eval do
         before_action :first, only: %i[index]
         after_action :second, only: %i[show]
-        def first  = @first = "Biba"
+        def first; @first = "Biba"; end
 
-        def second = @second = "Boba"
+        def second; @second = "Boba"; end
       end
 
       function.send(:process)
@@ -75,4 +76,5 @@ describe ActiveFunction::Functions::Callbacks do
       assert_nil function.instance_variable_get(:@second)
     end
   end
+  # rubocop:enable Style/SingleLineMethods
 end
