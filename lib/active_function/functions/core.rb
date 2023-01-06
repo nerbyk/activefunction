@@ -25,34 +25,35 @@ module ActiveFunction
 
   module Functions
     module Core
-      RESPONSE = {
-        statusCode: 200,
-        body:       {},
-        headers:    {}
-      }.freeze
+      RESPONSE = { statusCode: 200, body: {}, headers: {} }.freeze
 
-      attr_reader :event, :context
+      def self.included(base)
+        base.extend(ClassMethods)
+      end
 
-      def initialize(event:, context: nil)
-        @event          = event
-        @context        = context
-        @route          = route
+      attr_reader :action_name, :request, :response
+
+      def initialize(action_name, request)
+        @request        = request
+        @action_name    = action_name
         @performed      = false
         @response       = Hash[RESPONSE]
       end
 
-      def route
-        raise NotImplementedError, "Please, define 'route: -> Symbol' method!"
-      end
+      def process
+        raise MissingRouteMethod, action_name unless respond_to?(action_name)
 
-      private def process
-        raise MissingRouteMethod, @route unless respond_to?(@route)
+        public_send action_name
 
-        public_send @route
-
-        raise NotRenderedError, @route unless @performed
+        raise NotRenderedError, action_name unless @performed
 
         @response.to_h
+      end
+
+      module ClassMethods
+        def process(action_name, request: {})
+          new(action_name, request).process
+        end
       end
     end
   end
