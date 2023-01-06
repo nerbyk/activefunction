@@ -1,44 +1,84 @@
-# frozen_string_literal: true
-
 require "test_helper"
 
-describe ActiveFunction::Functions::Rendering do
-  describe "#render" do
-    let(:function_class) { function_with_render }
-    let(:route) { :index }
-    let(:function) { function_class.new(route) }
-    let(:response) { function.instance_variable_get(:@response) }
+class RenderingTestFunction
+  include ActiveFunction::Functions::Core
+  include ActiveFunction::Functions::Rendering
 
-    it "should render json" do
-      function.render(json: {a: 1, b: 2})
+  def index
+    render
+  end
+end
 
-      assert response[:statusCode], 200
-      assert response[:headers], {"Content-Type" => "application/json"}
-      assert response[:body], '{"a":1,"b":2}'
+class RenderingTest < Minitest::Test
+  def setup
+    @function = RenderingTestFunction.new(:index, {})
+  end
+
+  def test_render_default_response
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@response)[:statusCode], 200
+    assert_equal @function.instance_variable_get(:@response)[:headers], {"Content-Type" => "application/json"}
+    assert_equal @function.instance_variable_get(:@response)[:body], "{}"
+  end
+end
+
+class DoubleRenderTestFunction < RenderingTestFunction
+  def index
+    super
+    render
+  end
+end
+
+class DoubleRenderTest < Minitest::Test
+  def setup
+    @function = DoubleRenderTestFunction.new(:index, {})
+  end
+
+  def test_double_render
+    assert_raises ActiveFunction::DoubleRenderError do
+      @function.process
     end
+  end
+end
 
-    it "should render json with status" do
-      function.render(status: 201, json: {a: 1, b: 2})
+class RenderCustomResponseTestFunction < RenderingTestFunction
+  def index
+    render json: {a: 1, b: 2}, head: {"X-Test" => "test"}, status: 201
+  end
+end
 
-      assert response[:statusCode], 201
-      assert response[:headers], {"Content-Type" => "application/json"}
-      assert response[:body], '{"a":1,"b":2}'
-    end
+class RenderCustomResponseTest < Minitest::Test
+  def setup
+    @function = RenderCustomResponseTestFunction.new(:index, {})
+  end
 
-    it "should render json with head" do
-      function.render(head: {"X-Test" => "test"}, json: {a: 1, b: 2})
+  def test_render_custom_response
+    @function.process
 
-      assert response[:statusCode], 200
-      assert response[:headers], {"Content-Type" => "application/json", "X-Test" => "test"}
-      assert response[:body], '{"a":1,"b":2}'
-    end
+    assert_equal  @function.instance_variable_get(:@response)[:statusCode], 201
+    assert_equal  @function.instance_variable_get(:@response)[:headers], {"Content-Type" => "application/json", "X-Test" => "test"}
+    assert_equal  @function.instance_variable_get(:@response)[:body], '{"a":1,"b":2}'
+  end
+end
 
-    it "should raise DoubleRenderError" do
-      function.render(json: {a: 1, b: 2})
+class NotRenderedTestFunction
+  include ActiveFunction::Functions::Core
+  include ActiveFunction::Functions::Rendering
 
-      assert_raises ActiveFunction::DoubleRenderError do
-        function.render(json: {a: 1, b: 2})
-      end
+  def index
+    nil
+  end
+end
+
+class NotRenderedTest < Minitest::Test
+  def setup
+    @function = NotRenderedTestFunction.new(:index, {})
+  end
+
+  def test_not_rendered
+    assert_raises ActiveFunction::NotRenderedError do
+      @function.process
     end
   end
 end
