@@ -13,58 +13,57 @@ module ActiveFunction
 
   module Functions
     module Callbacks # :nodoc:
-      TYPES = [
-        BEFORE = :before,
-        AFTER  = :after
-      ].freeze
 
-      class << self
-        def included(base)
-          base.extend(ClassMethods)
-        end
+      def self.included(base)
+        base.extend(ClassMethods)
       end
-
-      private
 
       def process(*)
         run_callbacks { super }
       end
 
+      private
+
       def run_callbacks(&block)
-        exec BEFORE
+        _exec :before
 
         yield
 
-        exec AFTER
+        _exec :after
       end
 
-      def exec(type)
+      def _exec(type)
         self.class.callbacks[type].each do |callback_method, options|
           raise MissingCallbackContext, callback_method unless respond_to?(callback_method, true)
 
-          send(callback_method) if executable?(options)
+          send(callback_method) if _executable?(options)
         end
       end
 
-      def executable?(options)
-        return false if options[:only] && !options[:only]&.include?(@route)
+      def _executable?(options)
+        return false if options[:only] && !options[:only]&.include?(action_name)
         return false if options[:if] && !send(options[:if])
         true
       end
 
       module ClassMethods # :nodoc:
-        DEFAULT_CALLBACK = Hash[TYPES.product([{}]).to_h].freeze
 
-        TYPES.each do |callback|
-          define_method(:"#{callback}_action") do |method, options = {}|
-            callbacks[callback][method] = options
-          end
+        def before_action(method, options = {})
+          set_callback(:before, method, options)
+        end
+
+        def after_action(method, options = {})
+          set_callback(:after, method, options)
+        end
+
+        def set_callback(type, method, options = {})
+          callbacks[type][method] = options
         end
 
         def callbacks
-          return @_callbacks if instance_variable_defined?(:@callbacks)
+          @__callbacks ||= { before: {}, after: {} }
 
-          @_callbacks = Hash[DEFAULT_CALLBACK]
+          @__callbacks
         end
       end
     end

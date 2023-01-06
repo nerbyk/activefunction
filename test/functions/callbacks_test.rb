@@ -1,80 +1,172 @@
-# frozen_string_literal: true
-
 require "test_helper"
 
-describe ActiveFunction::Functions::Callbacks do
-  # rubocop:disable Style/SingleLineMethods
-  describe "#process" do
-    let(:function_class) { function_with_callbacks }
-    let(:route) { :index }
-    let(:function) { function_class.new(route) }
+class CallbackTestFunction
+  include ActiveFunction::Functions::Core
+  include ActiveFunction::Functions::Callbacks
 
-    it "should call callbacks" do
-      function_class.class_eval do
-        before_action :first
-        after_action :second
-        def first; @first = "Biba"; end
+  def index
+    nil
+  end
 
-        def second; @second = "Boba"; end
-      end
+  def show
+    nil
+  end
 
-      function.send(:process)
+  private # callback methods
 
-      assert function.instance_variable_get(:@performed), true
-      assert function.instance_variable_get(:@first), "Biba"
-      assert function.instance_variable_get(:@second), "Boba"
-    end
-    it "should call several callbacks of the same type" do
-      function_class.class_eval do
-        before_action :first
-        before_action :second
-        def first; @first = "Biba"; end
+  def first
+    @first = "Biba"
+  end
 
-        def second; @second = "Boba"; end
-      end
+  def second
+    @second = "Boba"
+  end
+end
 
-      function.send(:process)
+class CallbackTestFunction1 < CallbackTestFunction
+  set_callback :before, :first
+end
 
-      assert function.instance_variable_get(:@performed), true
-      assert function.instance_variable_get(:@first), "Biba"
-      assert function.instance_variable_get(:@second), "Boba"
-    end
+class CallbackTest1 < Minitest::Test
+  def setup
+    @function = CallbackTestFunction1.new(:index, {})
+    @function.instance_variable_set(:@performed, true)
+  end
 
-    it "should call conditional callbacks" do
-      function_class.class_eval do
-        before_action :first, if: :condition
-        after_action :second, if: :condition2
-        def first; @first = "Biba"; end
+  def test_callback
+    @function.process
 
-        def second; @second = "Boba"; end
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
+end
 
-        def condition; true; end
+class CallbackTestFunction2 < CallbackTestFunction
+  before_action :first
+  after_action :second
+end
 
-        def condition2; false; end
-      end
+class CallbackTest2 < Minitest::Test
+  def setup
+    @function = CallbackTestFunction2.new(:index, {})
+    @function.instance_variable_set(:@performed, true)
+  end
 
-      function.send(:process)
+  def test_before_action_callback
+    @function.process
 
-      assert function.instance_variable_get(:@performed), true
-      assert function.instance_variable_get(:@first), "Biba"
-      assert_nil function.instance_variable_get(:@second)
-    end
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
 
-    it "should call callbacks with only option" do
-      function_class.class_eval do
-        before_action :first, only: %i[index]
-        after_action :second, only: %i[show]
-        def first; @first = "Biba"; end
+  def test_after_action_callback
+    @function.process
 
-        def second; @second = "Boba"; end
-      end
+    assert_equal @function.instance_variable_get(:@second), "Boba"
+  end
+end
 
-      function.send(:process)
+class ConditionalCallbacksTestFunction1 < CallbackTestFunction
+  before_action :first, only: %i[index]
+  after_action :second, only: %i[show]
+end
 
-      assert function.instance_variable_get(:@performed), true
-      assert function.instance_variable_get(:@first), "Biba"
-      assert_nil function.instance_variable_get(:@second)
+class ConditionalCallbacksTest1 < Minitest::Test
+  def setup_function(action)
+    @function = ConditionalCallbacksTestFunction1.new(action, {}).tap do |f|
+      f.instance_variable_set(:@performed, true)
     end
   end
-  # rubocop:enable Style/SingleLineMethods
+
+  def test_before_action_callback
+    setup_function(:index)
+
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+    assert_nil @function.instance_variable_get(:@second)
+  end
+
+  def test_after_action_callback
+    setup_function(:show)
+
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@second), "Boba"
+  end
+end
+
+class ConditionalCallbacksTestFunction2 < CallbackTestFunction
+  before_action :first, only: %i[show index]
+end
+
+class ConditionalCallbacksTest2 < Minitest::Test
+  def setup_function(action)
+    @function = ConditionalCallbacksTestFunction2.new(action, {}).tap do |f|
+      f.instance_variable_set(:@performed, true)
+    end
+  end
+
+  def test_callback_for_index_action
+    setup_function(:index)
+
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
+
+  def test_callback_for_show_action
+    setup_function(:show)
+
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
+end
+
+class ConditionalCallbacksTestFunction3 < CallbackTestFunction
+  before_action :first, if: :executable?
+  after_action :second, if: :not_executable?
+
+  private
+  def executable?
+    false
+  end
+
+  def not_executable?
+    true
+  end
+end
+
+class ConditionalCallbacksTest3 < Minitest::Test
+  def setup
+    @function = ConditionalCallbacksTestFunction3.new(:index, {})
+    @function.instance_variable_set(:@performed, true)
+  end
+
+  def test_if_before_action_callback
+    @function.process
+
+    assert_nil @function.instance_variable_get(:@first)
+    assert_equal @function.instance_variable_get(:@second), "Boba"
+  end
+end
+
+class ConditionalCallbacksTestFunction4 < CallbackTestFunction
+  before_action :first, only: %i[index], if: :executable?
+
+  private def executable?
+    true
+  end
+end
+
+class ConditionalCallbacksTest4 < Minitest::Test
+  def setup
+    @function = ConditionalCallbacksTestFunction4.new(:index, {})
+    @function.instance_variable_set(:@performed, true)
+  end
+
+  def test_callback_with_all_condition_options
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
 end
