@@ -25,7 +25,7 @@ module ActiveFunction
 
   module Functions
     module Core
-      RESPONSE = { statusCode: 200, body: {}, headers: {} }.freeze
+      RESPONSE = {statusCode: 200, body: {}, headers: {}}.freeze
 
       def self.included(base)
         base.extend(ClassMethods)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class CallbackTestFunction
@@ -127,6 +129,7 @@ class ConditionalCallbacksTestFunction3 < CallbackTestFunction
   after_action :second, if: :not_executable?
 
   private
+
   def executable?
     false
   end

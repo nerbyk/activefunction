@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class CoreTestFunction
@@ -9,17 +11,17 @@ class CoreTestFunction
 end
 
 class CoreTest < Minitest::Test
-
   def setup
     @function_class = CoreTestFunction
   end
+
   def test_process
     fn = @function_class.new(:index, {body: {}})
 
     assert_equal fn.instance_variable_get(:@action_name), :index
     assert_equal fn.instance_variable_get(:@request), {body: {}}
     assert_equal fn.instance_variable_get(:@performed), false
-    assert_equal fn.instance_variable_get(:@response), { statusCode: 200, body: {}, headers: {} }
+    assert_equal fn.instance_variable_get(:@response), {statusCode: 200, body: {}, headers: {}}
 
     mock = Minitest::Mock.new
     mock.expect(:call, nil)

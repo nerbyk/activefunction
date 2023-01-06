@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "active_function"
 
 class BlogPostFunction < ActiveFunction::Base
@@ -21,7 +23,7 @@ class BlogPostFunction < ActiveFunction::Base
     if blog_post.errors.blank?
       render json: blog_post
     else
-      render json: { errors: blog_post.errors }, status: 422
+      render json: {errors: blog_post.errors}, status: 422
     end
   end
 
@@ -31,7 +33,7 @@ class BlogPostFunction < ActiveFunction::Base
     if @blog_post.errors.blank?
       render json: @blog_post
     else
-      render json: { errors: @blog_post.errors }, status: 422
+      render json: {errors: @blog_post.errors}, status: 422
     end
   end
 

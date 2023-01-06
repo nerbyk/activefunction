@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class RenderingTestFunction
@@ -56,9 +58,9 @@ class RenderCustomResponseTest < Minitest::Test
   def test_render_custom_response
     @function.process
 
-    assert_equal  @function.instance_variable_get(:@response)[:statusCode], 201
-    assert_equal  @function.instance_variable_get(:@response)[:headers], {"Content-Type" => "application/json", "X-Test" => "test"}
-    assert_equal  @function.instance_variable_get(:@response)[:body], '{"a":1,"b":2}'
+    assert_equal @function.instance_variable_get(:@response)[:statusCode], 201
+    assert_equal @function.instance_variable_get(:@response)[:headers], {"Content-Type" => "application/json", "X-Test" => "test"}
+    assert_equal @function.instance_variable_get(:@response)[:body], '{"a":1,"b":2}'
   end
 end
 

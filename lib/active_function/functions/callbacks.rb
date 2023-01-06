@@ -13,7 +13,6 @@ module ActiveFunction
 
   module Functions
     module Callbacks # :nodoc:
-
       def self.included(base)
         base.extend(ClassMethods)
       end
@@ -47,7 +46,6 @@ module ActiveFunction
       end
 
       module ClassMethods # :nodoc:
-
         def before_action(method, options = {})
           set_callback(:before, method, options)
         end
@@ -61,7 +59,7 @@ module ActiveFunction
         end
 
         def callbacks
-          @__callbacks ||= { before: {}, after: {} }
+          @__callbacks ||= {before: {}, after: {}}
 
           @__callbacks
         end

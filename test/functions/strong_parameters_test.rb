@@ -17,7 +17,6 @@ class StrongParametersTest < Minitest::Test
   end
 end
 
-
 describe ActiveFunction::Functions::StrongParameters::Parameters do
   let(:described_class) { ::ActiveFunction::Functions::StrongParameters::Parameters }
 
