@@ -11,12 +11,5 @@ module ActiveFunction
     include Functions::Rendering
     include Functions::StrongParameters
     include Functions::Callbacks
-
-    def self.handler(**options)
-      options         = Hash[options]
-      options[:event] = JSON.parse(options[:event], symbolize_names: true)
-
-      new(**options).send(:process)
-    end
   end
 end

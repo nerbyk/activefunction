@@ -13,58 +13,49 @@ module ActiveFunction
 
   module Functions
     module Callbacks # :nodoc:
-      TYPES = [
-        BEFORE = :before,
-        AFTER  = :after
-      ].freeze
+      def self.included(base)
+        base.extend(ClassMethods)
+      end
 
-      class << self
-        def included(base)
-          base.extend(ClassMethods)
-        end
+      def process(*)
+        _run_callbacks :before
+
+        super
+
+        _run_callbacks :after
       end
 
       private
 
-      def process(*)
-        run_callbacks { super }
-      end
-
-      def run_callbacks(&block)
-        exec BEFORE
-
-        yield
-
-        exec AFTER
-      end
-
-      def exec(type)
+      def _run_callbacks(type)
         self.class.callbacks[type].each do |callback_method, options|
           raise MissingCallbackContext, callback_method unless respond_to?(callback_method, true)
 
-          send(callback_method) if executable?(options)
+          send(callback_method) if _executable?(options)
         end
       end
 
-      def executable?(options)
-        return false if options[:only] && !options[:only]&.include?(@route)
+      def _executable?(options)
+        return false if options[:only] && !options[:only]&.include?(action_name)
         return false if options[:if] && !send(options[:if])
         true
       end
 
       module ClassMethods # :nodoc:
-        DEFAULT_CALLBACK = Hash[TYPES.product([{}]).to_h].freeze
-
-        TYPES.each do |callback|
-          define_method(:"#{callback}_action") do |method, options = {}|
-            callbacks[callback][method] = options
+        [:before, :after].each do |callback|
+          define_method "#{callback}_action" do |method, options = {}|
+            set_callback(callback, method, options)
           end
         end
 
-        def callbacks
-          return @_callbacks if instance_variable_defined?(:@callbacks)
+        def set_callback(type, method, options = {})
+          callbacks[type][method] = options
+        end
 
-          @_callbacks = Hash[DEFAULT_CALLBACK]
+        def callbacks
+          @__callbacks ||= {before: {}, after: {}}
+
+          @__callbacks
         end
       end
     end

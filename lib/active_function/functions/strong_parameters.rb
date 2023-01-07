@@ -25,8 +25,8 @@ module ActiveFunction
 
   module Functions
     module StrongParameters
-      def params(parameters = @event)
-        @params ||= Parameters.new(parameters)
+      def params
+        @_params ||= Parameters.new(request)
       end
 
       class Parameters
@@ -57,7 +57,7 @@ module ActiveFunction
           attributes.each do |attribute|
             if attribute.is_a? Hash
               attribute.each do |k, v|
-                pparams[k] = permit_nested_attribute(k, v)
+                pparams[k] = process_nested(self[k], :permit, v)
               end
             else
               next unless parameters.key?(attribute)
@@ -72,7 +72,7 @@ module ActiveFunction
         def to_h
           raise UnpermittedParameterError, parameters.keys unless @permitted
 
-          parameters.transform_values { convert_nested(_1) }
+          parameters.transform_values { process_nested(_1, :to_h) }
         end
 
         private
@@ -85,19 +85,11 @@ module ActiveFunction
           end
         end
 
-        def permit_nested_attribute(key, value)
-          case self[key]
-          in Parameters then self[key].permit(*value)
-          in Array[Parameters, *] then self[key].map { _1.permit(*value) }
-          else self[key]
-          end
-        end
-
-        def convert_nested(value)
-          case value
-          in Parameters then value.to_h
-          in Array[Parameters, *] then value.map { _1.to_h }
-          else value
+        def process_nested(attr, method, options = [])
+          case attr
+          in Parameters then attr.send(method, *options)
+          in Array[Parameters, *] then attr.map { _1.send(method, *options) }
+          else attr
           end
         end
 
