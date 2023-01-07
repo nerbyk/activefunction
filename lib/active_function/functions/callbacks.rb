@@ -18,20 +18,16 @@ module ActiveFunction
       end
 
       def process(*)
-        run_callbacks { super }
+        _run_callbacks :before
+
+        super
+
+        _run_callbacks :after
       end
 
       private
 
-      def run_callbacks(&block)
-        _exec :before
-
-        yield
-
-        _exec :after
-      end
-
-      def _exec(type)
+      def _run_callbacks(type)
         self.class.callbacks[type].each do |callback_method, options|
           raise MissingCallbackContext, callback_method unless respond_to?(callback_method, true)
 
@@ -46,12 +42,10 @@ module ActiveFunction
       end
 
       module ClassMethods # :nodoc:
-        def before_action(method, options = {})
-          set_callback(:before, method, options)
-        end
-
-        def after_action(method, options = {})
-          set_callback(:after, method, options)
+        [:before, :after].each do |callback|
+          define_method "#{callback}_action" do |method, options = {}|
+            set_callback(callback, method, options)
+          end
         end
 
         def set_callback(type, method, options = {})

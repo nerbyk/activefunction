@@ -43,12 +43,14 @@ module ActiveFunction
       def process
         raise MissingRouteMethod, action_name unless respond_to?(action_name)
 
-        public_send action_name
+        public_send(action_name)
 
-        raise NotRenderedError, action_name unless @performed
+        raise NotRenderedError, action_name unless performed?
 
         @response.to_h
       end
+
+      private def performed? = @performed
 
       module ClassMethods
         def process(action_name, request: {})
