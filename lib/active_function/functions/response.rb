@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveFunction
   module Functions
     class Response

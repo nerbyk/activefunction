@@ -82,7 +82,7 @@ module ActiveFunction
             Parameters.new(attribute)
           elsif attribute.is_a?(Array) && attribute[0].is_a?(Hash)
             attribute.map { Parameters.new(_1) }
-          else 
+          else
             attribute
           end
         end
@@ -92,7 +92,7 @@ module ActiveFunction
             attribute.send(method, *options)
           elsif attribute.is_a?(Array) && attribute[0].is_a?(Parameters)
             attribute.map { _1.send(method, *options) }
-          else 
+          else
             attribute
           end
         end
