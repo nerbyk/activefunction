@@ -1,0 +1,15 @@
+module ActiveFunction
+  type hash = Hash[untyped, untyped]
+
+  interface _Function
+    def action_name: -> Symbol
+    def request:     -> Hash[Symbol, untyped]
+    def response:    -> Functions::Response
+    def performed?:  -> bool
+  end
+
+  class Base
+    extend Functions::Core::ClassMethods
+    extend Functions::Callbacks::ClassMethods
+  end
+end

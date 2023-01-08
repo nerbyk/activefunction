@@ -78,18 +78,22 @@ module ActiveFunction
         private
 
         def nested_attribute(attribute)
-          case attribute
-          in Hash[**] then Parameters.new(attribute)
-          in Array[Hash[**], *] then attribute.map { Parameters.new(_1) }
-          else attribute
+          if attribute.is_a? Hash
+            Parameters.new(attribute)
+          elsif attribute.is_a?(Array) && attribute[0].is_a?(Hash)
+            attribute.map { Parameters.new(_1) }
+          else
+            attribute
           end
         end
 
-        def process_nested(attr, method, options = [])
-          case attr
-          in Parameters then attr.send(method, *options)
-          in Array[Parameters, *] then attr.map { _1.send(method, *options) }
-          else attr
+        def process_nested(attribute, method, options = [])
+          if attribute.is_a? Parameters
+            attribute.send(method, *options)
+          elsif attribute.is_a?(Array) && attribute[0].is_a?(Parameters)
+            attribute.map { _1.send(method, *options) }
+          else
+            attribute
           end
         end
 

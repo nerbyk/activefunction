@@ -21,7 +21,7 @@ class CoreTest < Minitest::Test
     assert_equal fn.instance_variable_get(:@action_name), :index
     assert_equal fn.instance_variable_get(:@request), {body: {}}
     assert_equal fn.instance_variable_get(:@performed), false
-    assert_equal fn.instance_variable_get(:@response), {statusCode: 200, body: {}, headers: {}}
+    assert_equal fn.instance_variable_get(:@response).to_h, {statusCode: 200, body: nil, headers: {}}
 
     mock = Minitest::Mock.new
     mock.expect(:call, nil)

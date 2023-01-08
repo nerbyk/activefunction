@@ -19,9 +19,11 @@ class RenderingTest < Minitest::Test
   def test_render_default_response
     @function.process
 
-    assert_equal @function.instance_variable_get(:@response)[:statusCode], 200
-    assert_equal @function.instance_variable_get(:@response)[:headers], {"Content-Type" => "application/json"}
-    assert_equal @function.instance_variable_get(:@response)[:body], "{}"
+    response = @function.instance_variable_get(:@response)
+
+    assert_equal response.status, 200
+    assert_equal response.headers, {"Content-Type" => "application/json"}
+    assert_equal response.body, "{}"
   end
 end
 
@@ -58,9 +60,11 @@ class RenderCustomResponseTest < Minitest::Test
   def test_render_custom_response
     @function.process
 
-    assert_equal @function.instance_variable_get(:@response)[:statusCode], 201
-    assert_equal @function.instance_variable_get(:@response)[:headers], {"Content-Type" => "application/json", "X-Test" => "test"}
-    assert_equal @function.instance_variable_get(:@response)[:body], '{"a":1,"b":2}'
+    response = @function.instance_variable_get(:@response)
+
+    assert_equal response.status, 201
+    assert_equal response.headers, {"Content-Type" => "application/json", "X-Test" => "test"}
+    assert_equal response.body, '{"a":1,"b":2}'
   end
 end
 
