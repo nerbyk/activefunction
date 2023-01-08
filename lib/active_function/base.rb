@@ -6,6 +6,7 @@ module ActiveFunction
     require "active_function/functions/callbacks"
     require "active_function/functions/strong_parameters"
     require "active_function/functions/rendering"
+    require "active_function/functions/response"
 
     include Functions::Core
     include Functions::Rendering
