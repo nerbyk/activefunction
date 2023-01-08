@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "json"
-
 module ActiveFunction
   class MissingRouteMethod < Error
     MESSAGE_TEMPLATE = "Missing function route: %s"
@@ -25,8 +23,6 @@ module ActiveFunction
 
   module Functions
     module Core
-      RESPONSE = {statusCode: 200, body: {}, headers: {}}.freeze
-
       def self.included(base)
         base.extend(ClassMethods)
       end
@@ -37,7 +33,7 @@ module ActiveFunction
         @request        = request
         @action_name    = action_name
         @performed      = false
-        @response       = Hash[RESPONSE]
+        @response       = Response.new
       end
 
       def process
@@ -47,7 +43,7 @@ module ActiveFunction
 
         raise NotRenderedError, action_name unless performed?
 
-        @response.to_h
+        response.to_h
       end
 
       private def performed? = @performed
