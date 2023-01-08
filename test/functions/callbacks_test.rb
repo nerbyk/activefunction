@@ -1,66 +1,175 @@
 # frozen_string_literal: true
-# # frozen_string_literal: true
 
-# require "test_helper"
+require "test_helper"
 
-# describe ActiveFunction::Functions::Callbacks do
-#   let(:described_class) { ActiveFunction::Functions::Callbacks }
+class CallbackTestFunction
+  include ActiveFunction::Functions::Core
+  include ActiveFunction::Functions::Callbacks
 
-#   before(:each) do
-#     @test_class = Class.new do
-#       include ActiveFunction::Functions::Callbacks
+  def index
+    nil
+  end
 
-#       # private
+  def show
+    nil
+  end
 
-#       # def test_method
-#       # end
+  private # callback methods
 
-#       # def test_method2
-#       # end
-#     end
-#   end
+  def first
+    @first = "Biba"
+  end
 
-#   describe "#(before|after)_action" do
-#     it "adds a callback" do
-#       @test_class.before_action :test_method
+  def second
+    @second = "Boba"
+  end
+end
 
-#       assert_includes @test_class.callbacks[:before], :test_method
-#     end
+class CallbackTestFunction1 < CallbackTestFunction
+  set_callback :before, :first
+end
 
-#     it "adds a before callback with options" do
-#       @test_class.after_action :test_method, only: :index, if: :test?
+class CallbackTest1 < Minitest::Test
+  def setup
+    @function = CallbackTestFunction1.new(:index, {})
+    @function.instance_variable_set(:@performed, true)
+  end
 
-#       assert_includes @test_class.callbacks[:after], :test_method
-#       assert_equal({only: :index, if: :test?}, @test_class.callbacks[:after][:test_method])
-#     end
+  def test_callback
+    @function.process
 
-#     it "adds multiple before callbacks" do
-#       @test_class.before_action :test_method
-#       @test_class.after_action :test_method2
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
+end
 
-#       assert_includes @test_class.callbacks[:before], :test_method
-#       assert_includes @test_class.callbacks[:after], :test_method2
-#     end
+class CallbackTestFunction2 < CallbackTestFunction
+  before_action :first
+  after_action :second
+end
 
-#     it "adds multiple before callbacks with options" do
-#       @test_class.before_action :test_method, only: :index
-#       @test_class.after_action :test_method2, if: :test?
+class CallbackTest2 < Minitest::Test
+  def setup
+    @function = CallbackTestFunction2.new(:index, {})
+    @function.instance_variable_set(:@performed, true)
+  end
 
-#       assert_includes @test_class.callbacks[:before], :test_method
-#       assert_includes @test_class.callbacks[:after], :test_method2
-#       assert_equal({only: :index}, @test_class.callbacks[:before][:test_method])
-#       assert_equal({if: :test?}, @test_class.callbacks[:after][:test_method2])
-#     end
-#   end
+  def test_before_action_callback
+    @function.process
 
-#   describe "#run_callbacks" do
-#     it "runs the callbacks" do
-#       mock = MiniTest::Mock.new
-#       mock.expect :test_method, true
-#       mock.expect :test_method2, true
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
 
-#       @test_class.before_action :test_method
-#       @test_class.after_action :test_method2
-#     end
-#   end
-# end
+  def test_after_action_callback
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@second), "Boba"
+  end
+end
+
+class ConditionalCallbacksTestFunction1 < CallbackTestFunction
+  before_action :first, only: %i[index]
+  after_action :second, only: %i[show]
+end
+
+class ConditionalCallbacksTest1 < Minitest::Test
+  def setup_function(action)
+    @function = ConditionalCallbacksTestFunction1.new(action, {}).tap do |f|
+      f.instance_variable_set(:@performed, true)
+    end
+  end
+
+  def test_before_action_callback
+    setup_function(:index)
+
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+    assert_nil @function.instance_variable_get(:@second)
+  end
+
+  def test_after_action_callback
+    setup_function(:show)
+
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@second), "Boba"
+  end
+end
+
+class ConditionalCallbacksTestFunction2 < CallbackTestFunction
+  before_action :first, only: %i[show index]
+end
+
+class ConditionalCallbacksTest2 < Minitest::Test
+  def setup_function(action)
+    @function = ConditionalCallbacksTestFunction2.new(action, {}).tap do |f|
+      f.instance_variable_set(:@performed, true)
+    end
+  end
+
+  def test_callback_for_index_action
+    setup_function(:index)
+
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
+
+  def test_callback_for_show_action
+    setup_function(:show)
+
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
+end
+
+class ConditionalCallbacksTestFunction3 < CallbackTestFunction
+  before_action :first, if: :executable?
+  after_action :second, if: :not_executable?
+
+  private
+
+  def executable?
+    false
+  end
+
+  def not_executable?
+    true
+  end
+end
+
+class ConditionalCallbacksTest3 < Minitest::Test
+  def setup
+    @function = ConditionalCallbacksTestFunction3.new(:index, {})
+    @function.instance_variable_set(:@performed, true)
+  end
+
+  def test_if_before_action_callback
+    @function.process
+
+    assert_nil @function.instance_variable_get(:@first)
+    assert_equal @function.instance_variable_get(:@second), "Boba"
+  end
+end
+
+class ConditionalCallbacksTestFunction4 < CallbackTestFunction
+  before_action :first, only: %i[index], if: :executable?
+
+  private def executable?
+    true
+  end
+end
+
+class ConditionalCallbacksTest4 < Minitest::Test
+  def setup
+    @function = ConditionalCallbacksTestFunction4.new(:index, {})
+    @function.instance_variable_set(:@performed, true)
+  end
+
+  def test_callback_with_all_condition_options
+    @function.process
+
+    assert_equal @function.instance_variable_get(:@first), "Biba"
+  end
+end

@@ -4,12 +4,12 @@ require "json"
 
 module ActiveFunction
   class DoubleRenderError < Error
-    MESSAGE_TEMPLATE = "render was called multiple times in %s action."
+    MESSAGE_TEMPLATE = "#render was called multiple times in action: %s"
 
     attr_reader :message
 
-    def initialize(action_name)
-      @message = MESSAGE_TEMPLATE % action_name
+    def initialize(context)
+      @message = MESSAGE_TEMPLATE % context
     end
   end
 
@@ -18,11 +18,11 @@ module ActiveFunction
       DEFAULT_HEADER = {"Content-Type" => "application/json"}.freeze
 
       def render(status: 200, json: {}, head: {})
-        raise DoubleRenderError, @route if @performed
+        raise DoubleRenderError, action_name if performed?
 
-        @response[:statusCode] = status
-        @response[:headers]    = head.merge(Hash[DEFAULT_HEADER])
-        @response[:body]       = JSON.generate(json)
+        response.status     = status
+        response.headers    = head.merge(Hash[DEFAULT_HEADER])
+        response.body       = JSON.generate(json)
 
         @performed = true
       end

@@ -10,4 +10,10 @@
 - Add RBS Aws Event Types
 - Add public interface type `steep` checking
 - Add `ruby-next` transpiler
-- 
+
+## [0.2.0] - 2023-01-08
+
+- Add unit tests
+- Fix Steep pipeline & add better RBS type signatures 
+- Refactor `::Functions` module
+- Add `Response` class

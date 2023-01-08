@@ -1,3 +1,5 @@
+name: Rubocop & Steep
+
 on:
   push:
     branches:

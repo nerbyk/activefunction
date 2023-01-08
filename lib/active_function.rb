@@ -5,7 +5,7 @@ require "ruby-next/language/setup"
 
 RubyNext::Language.setup_gem_load_path(transpile: true)
 
-module ActiveFunction # :nodoc:
+module ActiveFunction
   class Error < StandardError; end
 
   require "active_function/version"

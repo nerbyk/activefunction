@@ -1,0 +1,20 @@
+module ActiveFunction
+  class DoubleRenderError < Error
+    MESSAGE_TEMPLATE: String
+
+    attr_reader message: String
+
+    def initialize: (untyped context) -> void
+  end
+
+  module Functions
+    module Rendering
+      include _Function
+
+      DEFAULT_HEADER: Hash[String, String]
+      @performed: bool
+
+      def render: (?status: ::Integer, ?json: hash, ?head: hash) -> void
+    end
+  end
+end

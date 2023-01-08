@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ActiveFunction
-  class MissingCallbackContext < Error # :no_doc:
+  class MissingCallbackContext < Error
     MESSAGE_TEMPLATE = "Missing callback context: %s"
 
     attr_reader :message
@@ -12,59 +12,52 @@ module ActiveFunction
   end
 
   module Functions
-    module Callbacks # :nodoc:
-      TYPES = [
-        BEFORE = :before,
-        AFTER  = :after
-      ].freeze
+    module Callbacks
+      def self.included(base)
+        base.extend(ClassMethods)
+      end
 
-      class << self
-        def included(base)
-          base.extend(ClassMethods)
-        end
+      def process
+        _run_callbacks :before
+
+        super
+
+        _run_callbacks :after
       end
 
       private
 
-      def process(*)
-        run_callbacks { super }
-      end
-
-      def run_callbacks(&block)
-        exec BEFORE
-
-        yield
-
-        exec AFTER
-      end
-
-      def exec(type)
+      def _run_callbacks(type)
         self.class.callbacks[type].each do |callback_method, options|
           raise MissingCallbackContext, callback_method unless respond_to?(callback_method, true)
 
-          send(callback_method) if executable?(options)
+          send(callback_method) if _executable?(options)
         end
       end
 
-      def executable?(options)
-        return false unless options[:only]&.include?(@route)
-        return false unless options[:if] && send(options[:if])
+      def _executable?(options)
+        return false if options[:only] && !options[:only]&.include?(action_name)
+        return false if options[:if] && !send(options[:if])
         true
       end
 
-      module ClassMethods # :nodoc:
-        DEFAULT_CALLBACK = Hash[TYPES.product([{}]).to_h].freeze
+      module ClassMethods
+        def before_action(method, options = {})
+          set_callback :before, method, options
+        end
 
-        TYPES.each do |callback|
-          define_method(:"#{callback}_action") do |method, options = {}|
-            callbacks[callback][method] = options
-          end
+        def after_action(method, options = {})
+          set_callback :after, method, options
+        end
+
+        def set_callback(type, method, options = {})
+          callbacks[type][method] = options
         end
 
         def callbacks
-          return @_callbacks if instance_variable_defined?(:@callbacks)
+          @__callbacks ||= {before: {}, after: {}}
 
-          @_callbacks = Hash[DEFAULT_CALLBACK]
+          @__callbacks
         end
       end
     end

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "json"
-
 module ActiveFunction
   class MissingRouteMethod < Error
     MESSAGE_TEMPLATE = "Missing function route: %s"
@@ -13,52 +11,46 @@ module ActiveFunction
     end
   end
 
+  class NotRenderedError < Error
+    MESSAGE_TEMPLATE = "render was not called: %s"
+
+    attr_reader :message
+
+    def initialize(context)
+      @message = MESSAGE_TEMPLATE % context
+    end
+  end
+
   module Functions
     module Core
-      RESPONSE = {
-        statusCode: 200,
-        body:       {},
-        headers:    {}
-      }.freeze
-
-      class << self
-        def included(base)
-          base.extend(ClassMethods)
-        end
+      def self.included(base)
+        base.extend(ClassMethods)
       end
 
-      attr_reader :event, :context
+      attr_reader :action_name, :request, :response
 
-      def initialize(event:, context: nil)
-        @event          = event
-        @context        = context
-        @route          = route
+      def initialize(action_name, request)
+        @request        = request
+        @action_name    = action_name
         @performed      = false
-        @response       = Hash[RESPONSE]
+        @response       = Response.new
       end
-
-      def route
-        raise NotImplementedError, "Please, define 'route: -> Symbol' method!"
-      end
-
-      private
 
       def process
-        raise MissingRouteMethod unless respond_to?(@route)
+        raise MissingRouteMethod, action_name unless respond_to?(action_name)
 
-        public_send @route
+        public_send(action_name)
 
-        render unless @performed
+        raise NotRenderedError, action_name unless performed?
 
-        @response.to_h
+        response.to_h
       end
 
-      module ClassMethods # :nodoc:
-        def handler(**options)
-          options         = Hash[options]
-          options[:event] = JSON.parse(options[:event], symbolize_names: true)
+      private def performed? = @performed
 
-          new(**options).send(:process)
+      module ClassMethods
+        def process(action_name, request: {})
+          new(action_name, request).process
         end
       end
     end
