@@ -91,8 +91,8 @@ module ActiveFunction
           if attribute.is_a? Parameters
             attribute.send(method, *options)
           elsif attribute.is_a?(Array) && attribute[0].is_a?(Parameters)
-            attribute.map { _1.send(method, options.to_a) }
-          else
+            attribute.map { _1.send(method, *options) }
+          else 
             attribute
           end
         end

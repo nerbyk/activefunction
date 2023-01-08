@@ -31,7 +31,7 @@ module ActiveFunction
         def initialize: (hash parameters, ?permitted: bool) -> void
         def []: (Symbol attribute) -> (Array[Parameters] | Parameters)
         def require: (Symbol attribute) -> (Array[Parameters] | Parameters)
-        def permit: (*untyped | Symbol attributes) -> Parameters
+        def permit: (*untyped attributes) -> Parameters
         def to_h: -> hash     
 
         private
@@ -40,7 +40,7 @@ module ActiveFunction
           | (Array[hash] attribute) -> Array[Parameters]
           | (untyped attribute) -> untyped
 
-        def process_nested: (untyped attr, Symbol method, ?Array[untyped] options) -> (Parameters | Array[Parameters] | untyped)
+        def process_nested: (untyped attr, Symbol method, ?Array[Symbol] options) -> (Parameters | Array[Parameters] | untyped)
 
         attr_reader parameters: hash   
       end
