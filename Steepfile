@@ -3,5 +3,12 @@
 target :lib do
   signature "sig"
 
-  check "sig/types" # check only public API
+  check "lib"
+
+  ignore "lib/active_function/version.rb"
+
+  library(
+    "json",
+    "forwardable"
+  )
 end
