@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ActiveFunction
-  class MissingCallbackContext < Error # :no_doc:
+  class MissingCallbackContext < Error
     MESSAGE_TEMPLATE = "Missing callback context: %s"
 
     attr_reader :message
@@ -12,12 +12,12 @@ module ActiveFunction
   end
 
   module Functions
-    module Callbacks # :nodoc:
+    module Callbacks
       def self.included(base)
         base.extend(ClassMethods)
       end
 
-      def process(*)
+      def process
         _run_callbacks :before
 
         super
@@ -41,11 +41,13 @@ module ActiveFunction
         true
       end
 
-      module ClassMethods # :nodoc:
-        [:before, :after].each do |callback|
-          define_method "#{callback}_action" do |method, options = {}|
-            set_callback(callback, method, options)
-          end
+      module ClassMethods
+        def before_action(method, options = {})
+          set_callback :before, method, options
+        end
+
+        def after_action(method, options = {})
+          set_callback :after, method, options
         end
 
         def set_callback(type, method, options = {})
