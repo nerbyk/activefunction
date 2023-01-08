@@ -1,0 +1,14 @@
+module ActiveFunction
+  module Functions
+    class Response
+      type responseHash = {statusCode: Integer, body: String | nil, headers: Hash[String, String]}
+
+      attr_accessor status: Integer
+      attr_accessor body: String | nil
+      attr_accessor headers: Hash[String, String]
+
+      def initialize: (?status: Integer, ?body:  String | nil, ?headers: Hash[String, String]) -> void
+      def to_h: -> responseHash
+    end
+  end 
+end
