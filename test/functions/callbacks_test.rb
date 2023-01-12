@@ -31,12 +31,11 @@ end
 
 class CallbackTest1 < Minitest::Test
   def setup
-    @function = CallbackTestFunction1.new(:index, {})
-    @function.instance_variable_set(:@performed, true)
+    @function = CallbackTestFunction1.new
   end
 
   def test_callback
-    @function.process
+    @function.dispatch(:index, {}, committed_response)
 
     assert_equal @function.instance_variable_get(:@first), "Biba"
   end
@@ -49,18 +48,17 @@ end
 
 class CallbackTest2 < Minitest::Test
   def setup
-    @function = CallbackTestFunction2.new(:index, {})
-    @function.instance_variable_set(:@performed, true)
+    @function = CallbackTestFunction2.new
   end
 
   def test_before_action_callback
-    @function.process
+    @function.dispatch(:index, {}, committed_response)
 
     assert_equal @function.instance_variable_get(:@first), "Biba"
   end
 
   def test_after_action_callback
-    @function.process
+    @function.dispatch(:index, {}, committed_response)
 
     assert_equal @function.instance_variable_get(:@second), "Boba"
   end
@@ -72,25 +70,19 @@ class ConditionalCallbacksTestFunction1 < CallbackTestFunction
 end
 
 class ConditionalCallbacksTest1 < Minitest::Test
-  def setup_function(action)
-    @function = ConditionalCallbacksTestFunction1.new(action, {}).tap do |f|
-      f.instance_variable_set(:@performed, true)
-    end
+  def setup
+    @function = ConditionalCallbacksTestFunction1.new
   end
 
   def test_before_action_callback
-    setup_function(:index)
-
-    @function.process
+    @function.dispatch(:index, {}, committed_response)
 
     assert_equal @function.instance_variable_get(:@first), "Biba"
     assert_nil @function.instance_variable_get(:@second)
   end
 
   def test_after_action_callback
-    setup_function(:show)
-
-    @function.process
+    @function.dispatch(:show, {}, committed_response)
 
     assert_equal @function.instance_variable_get(:@second), "Boba"
   end
@@ -101,24 +93,18 @@ class ConditionalCallbacksTestFunction2 < CallbackTestFunction
 end
 
 class ConditionalCallbacksTest2 < Minitest::Test
-  def setup_function(action)
-    @function = ConditionalCallbacksTestFunction2.new(action, {}).tap do |f|
-      f.instance_variable_set(:@performed, true)
-    end
+  def setup
+    @function = ConditionalCallbacksTestFunction2.new
   end
 
   def test_callback_for_index_action
-    setup_function(:index)
-
-    @function.process
+    @function.dispatch(:index, {}, committed_response)
 
     assert_equal @function.instance_variable_get(:@first), "Biba"
   end
 
   def test_callback_for_show_action
-    setup_function(:show)
-
-    @function.process
+    @function.dispatch(:show, {}, committed_response)
 
     assert_equal @function.instance_variable_get(:@first), "Biba"
   end
@@ -141,12 +127,11 @@ end
 
 class ConditionalCallbacksTest3 < Minitest::Test
   def setup
-    @function = ConditionalCallbacksTestFunction3.new(:index, {})
-    @function.instance_variable_set(:@performed, true)
+    @function = ConditionalCallbacksTestFunction3.new
   end
 
   def test_if_before_action_callback
-    @function.process
+    @function.dispatch(:index, {}, committed_response)
 
     assert_nil @function.instance_variable_get(:@first)
     assert_equal @function.instance_variable_get(:@second), "Boba"
@@ -163,12 +148,11 @@ end
 
 class ConditionalCallbacksTest4 < Minitest::Test
   def setup
-    @function = ConditionalCallbacksTestFunction4.new(:index, {})
-    @function.instance_variable_set(:@performed, true)
+    @function = ConditionalCallbacksTestFunction4.new
   end
 
   def test_callback_with_all_condition_options
-    @function.process
+    @function.dispatch(:index, {}, committed_response)
 
     assert_equal @function.instance_variable_get(:@first), "Biba"
   end

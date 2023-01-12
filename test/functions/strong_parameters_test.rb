@@ -9,7 +9,7 @@ end
 
 class StrongParametersTest < Minitest::Test
   def setup
-    @function = StrongParametersFunction.new(:index, {})
+    @function = StrongParametersFunction.new
   end
 
   def test_params

@@ -12,42 +12,29 @@ end
 
 class CoreTest < Minitest::Test
   def setup
-    @function_class = CoreTestFunction
+    @function = CoreTestFunction.new
   end
 
-  def test_process
-    fn = @function_class.new(:index, {body: {}})
-
-    assert_equal fn.instance_variable_get(:@action_name), :index
-    assert_equal fn.instance_variable_get(:@request), {body: {}}
-    assert_equal fn.instance_variable_get(:@performed), false
-    assert_equal fn.instance_variable_get(:@response).to_h, {statusCode: 200, body: nil, headers: {}}
-
+  def test_action_to_be_called
     mock = Minitest::Mock.new
     mock.expect(:call, nil)
 
-    fn.stub(:index, mock) do
-      fn.instance_variable_set(:@performed, true)
-      fn.process
+    @function.stub(:index, mock) do
+      @function.dispatch(:index, {body: {}}, committed_response)
     end
 
     mock.verify
   end
 
-  def test_process_raises_error_if_route_is_not_defined
-    fn = @function_class.new(:show, {})
-
+  def test_dispatch_raises_error_if_route_is_not_defined
     assert_raises ActiveFunction::MissingRouteMethod do
-      fn.instance_variable_set(:@performed, true)
-      fn.process
+      @function.dispatch(:show, {}, response)
     end
   end
 
-  def test_process_raises_error_if_render_was_not_called
-    fn = @function_class.new(:index, {})
-
+  def test_dispatch_raises_error_if_render_was_not_called
     assert_raises ActiveFunction::NotRenderedError do
-      fn.process
+      @function.dispatch(:index, {}, response)
     end
   end
 end

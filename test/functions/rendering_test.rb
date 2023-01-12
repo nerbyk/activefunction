@@ -13,11 +13,11 @@ end
 
 class RenderingTest < Minitest::Test
   def setup
-    @function = RenderingTestFunction.new(:index, {})
+    @function = RenderingTestFunction.new
   end
 
   def test_render_default_response
-    @function.process
+    @function.dispatch(:index, {}, response)
 
     response = @function.instance_variable_get(:@response)
 
@@ -36,12 +36,12 @@ end
 
 class DoubleRenderTest < Minitest::Test
   def setup
-    @function = DoubleRenderTestFunction.new(:index, {})
+    @function = DoubleRenderTestFunction.new
   end
 
   def test_double_render
     assert_raises ActiveFunction::DoubleRenderError do
-      @function.process
+      @function.dispatch(:index, {}, response)
     end
   end
 end
@@ -54,11 +54,11 @@ end
 
 class RenderCustomResponseTest < Minitest::Test
   def setup
-    @function = RenderCustomResponseTestFunction.new(:index, {})
+    @function = RenderCustomResponseTestFunction.new
   end
 
   def test_render_custom_response
-    @function.process
+    @function.dispatch(:index, {}, response)
 
     response = @function.instance_variable_get(:@response)
 
@@ -79,12 +79,12 @@ end
 
 class NotRenderedTest < Minitest::Test
   def setup
-    @function = NotRenderedTestFunction.new(:index, {})
+    @function = NotRenderedTestFunction.new
   end
 
   def test_not_rendered
     assert_raises ActiveFunction::NotRenderedError do
-      @function.process
+      @function.dispatch(:index, {}, response)
     end
   end
 end
