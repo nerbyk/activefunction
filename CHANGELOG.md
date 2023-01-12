@@ -17,3 +17,10 @@
 - Fix Steep pipeline & add better RBS type signatures 
 - Refactor `::Functions` module
 - Add `Response` class
+
+## [0.3.0] - 2023-01-12
+
+- cleanup
+- add ActiveFunction::Functions::Response#commit!
+- extract action processing to separate method to handle ActiveFunction::Functions::Callbacks#process overriding
+- add test for ActiveFunction::Base.process
