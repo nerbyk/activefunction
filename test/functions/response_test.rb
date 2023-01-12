@@ -32,4 +32,12 @@ class ResponseTest < Minitest::Test
 
     assert_equal @response.to_h, {statusCode: 201, headers: {"X-Test" => "test"}, body: "test"}
   end
+
+  def test_commit!
+    assert_equal @response.committed?, false
+
+    @response.commit!
+
+    assert_equal @response.committed?, true
+  end
 end

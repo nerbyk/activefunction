@@ -19,7 +19,7 @@ module ActiveFunction
       type callbackType = :before | :after
 
       def self.super: () -> singleton(Core)
-      def process: () -> untyped
+      def process: (*untyped) -> untyped
 
       private
 

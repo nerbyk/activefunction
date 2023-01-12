@@ -16,7 +16,7 @@ module ActiveFunction
   end
 
   module Functions
-    module StrongParameters
+    module StrongParameters : Core
       include _Function
       
       @_params: Parameters

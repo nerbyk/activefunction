@@ -12,5 +12,9 @@ module ActiveFunction
     include Functions::Rendering
     include Functions::StrongParameters
     include Functions::Callbacks
+
+    def self.process(action_name, request = {}, response = Functions::Response.new)
+      new.dispatch(action_name, request, response)
+    end
   end
 end

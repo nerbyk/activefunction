@@ -24,15 +24,11 @@ module ActiveFunction
       @request: Hash[Symbol, untyped]
       @response: Response
       
-      def initialize: (Symbol action_name, hash request) -> void
-      def process: -> Response::responseHash
+      def dispatch: (Symbol action_name, hash request, Response response) -> Response::responseHash
 
-      module ClassMethods
-        def new: (*untyped) -> Core
-        def process: (Symbol action_name, ?request: Hash[Symbol, untyped]) -> Response::responseHash
-      end
-      
-      def self.included: (singleton(Base) base) -> void
+      private
+
+      def process: (Symbol action) -> void
     end
   end
 end

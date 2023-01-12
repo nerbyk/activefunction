@@ -9,6 +9,7 @@ module ActiveFunction
         @status     = status
         @headers    = headers
         @body       = body
+        @committed  = false
       end
 
       def to_h
@@ -18,6 +19,12 @@ module ActiveFunction
           body:       body
         }
       end
+
+      def commit!
+        @committed = true
+      end
+
+      def committed? = @committed
     end
   end
 end

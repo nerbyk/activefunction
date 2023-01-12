@@ -26,7 +26,7 @@ module ActiveFunction
   module Functions
     module StrongParameters
       def params
-        @_params ||= Parameters.new(request)
+        @_params ||= Parameters.new(@request)
       end
 
       class Parameters
