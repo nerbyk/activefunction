@@ -18,13 +18,13 @@ module ActiveFunction
       DEFAULT_HEADER = {"Content-Type" => "application/json"}.freeze
 
       def render(status: 200, json: {}, head: {})
-        raise DoubleRenderError, action_name if performed?
+        raise DoubleRenderError, @action_name if performed?
 
-        response.status     = status
-        response.headers    = head.merge(Hash[DEFAULT_HEADER])
-        response.body       = JSON.generate(json)
+        @response.status     = status
+        @response.headers    = head.merge(Hash[DEFAULT_HEADER])
+        @response.body       = JSON.generate(json)
 
-        @performed = true
+        @response.commit!
       end
     end
   end

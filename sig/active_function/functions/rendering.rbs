@@ -8,7 +8,7 @@ module ActiveFunction
   end
 
   module Functions
-    module Rendering
+    module Rendering : Core
       include _Function
 
       DEFAULT_HEADER: Hash[String, String]

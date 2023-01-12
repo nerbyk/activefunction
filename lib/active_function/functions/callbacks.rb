@@ -17,15 +17,15 @@ module ActiveFunction
         base.extend(ClassMethods)
       end
 
-      def process
+      private
+
+      def process(*)
         _run_callbacks :before
 
         super
 
         _run_callbacks :after
       end
-
-      private
 
       def _run_callbacks(type)
         self.class.callbacks[type].each do |callback_method, options|
@@ -36,7 +36,7 @@ module ActiveFunction
       end
 
       def _executable?(options)
-        return false if options[:only] && !options[:only]&.include?(action_name)
+        return false if options[:only] && !options[:only].include?(@action_name)
         return false if options[:if] && !send(options[:if])
         true
       end
