@@ -33,6 +33,7 @@ module ActiveFunction
         def before_action: (Symbol method, ?hash options) -> void
         def after_action: (Symbol method, ?hash options) -> void
         def set_callback: (callbackType type, Symbol method, ?hash options) -> void
+        def inherited: (singleton(Base) subclass) -> void
       end
 
       def self.included: (singleton(Base) base) -> void
