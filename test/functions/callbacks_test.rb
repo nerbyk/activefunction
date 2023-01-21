@@ -70,7 +70,7 @@ class CallbackTest2 < Minitest::Test
     @function = CallbackTestFunction2Inherit.new
 
     @function.dispatch(:index, {}, committed_response)
-    
+
     assert_equal @function.instance_variable_get(:@first), "Biba"
     assert_equal @function.instance_variable_get(:@second), "Boba"
   end
