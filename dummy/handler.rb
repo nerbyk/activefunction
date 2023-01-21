@@ -16,5 +16,5 @@ def handler(event:, context:)
   http_method = event[:requestContext][:http][:method]
   action      = RESOURCE_ROUTES[http_method]
 
-  BlogPostFunction.process(action, request: params)
+  BlogPostFunction.process(action, params)
 end
