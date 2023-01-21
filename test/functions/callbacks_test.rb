@@ -46,6 +46,9 @@ class CallbackTestFunction2 < CallbackTestFunction
   after_action :second
 end
 
+class CallbackTestFunction2Inherit < CallbackTestFunction2
+end
+
 class CallbackTest2 < Minitest::Test
   def setup
     @function = CallbackTestFunction2.new
@@ -60,6 +63,15 @@ class CallbackTest2 < Minitest::Test
   def test_after_action_callback
     @function.dispatch(:index, {}, committed_response)
 
+    assert_equal @function.instance_variable_get(:@second), "Boba"
+  end
+
+  def test_inherit_callbacks
+    @function = CallbackTestFunction2Inherit.new
+
+    @function.dispatch(:index, {}, committed_response)
+    
+    assert_equal @function.instance_variable_get(:@first), "Biba"
     assert_equal @function.instance_variable_get(:@second), "Boba"
   end
 end
