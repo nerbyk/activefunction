@@ -42,6 +42,10 @@ module ActiveFunction
       end
 
       module ClassMethods
+        def inherited(subclass)
+          subclass.instance_variable_set(:@__callbacks, @__callbacks)
+        end
+
         def before_action(method, options = {})
           set_callback :before, method, options
         end

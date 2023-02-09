@@ -1,8 +1,52 @@
-# ActiveFunction::Functions
+# ActiveFunction
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/activefunction/functions`. To experiment with that code, run `bin/console` for an interactive prompt.
+rails/action_controller like gem which provides lightweight callbacks, strong parameters & rendering features. It's designed to be used with AWS Lambda functions, but can be used with any Ruby application.
 
-TODO: Delete this and the text above, and describe your gem
+## How
+
+Here's a simple example of a function that uses ActiveFunction:
+
+```ruby
+# ./src/functions/posts_function.rb
+
+require 'active_function'
+
+class PostsFunction < ActiveFunction::Base
+  before_action :set_blog_post, only: %i[update], if: :authorized?
+
+  def update
+    if @blog_post.update(blog_post_attributes)
+      render json: @blog_post
+    else
+      render json: @blog_post.errors, status: 422
+    end 
+  end
+  
+  private 
+
+  def authorized = true
+  def blog_post_attributes = params.require(:blog_post).permit(:title, :body).to_h
+  
+  def set_blog_post
+    @blog_post = BlogPost.find(params[:id])
+  end
+end
+
+```
+
+Use `#process` method to call the proceed request:
+
+```ruby
+request = {
+  "id": 1,
+  "blog_post": {
+    "title": "New title",
+    "body": "New body"
+  }
+}
+
+PostsFunction.process(:update, request)
+```
 
 ## Installation
 
@@ -20,9 +64,6 @@ Or install it yourself as:
 
     $ gem install activefunction
 
-## Usage
-
-TODO: Write usage instructions here
 
 ## Development
 
@@ -32,7 +73,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/activefunction. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/activefunction/blob/master/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at https://github.com/DanilMaximov/activefunction. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/DanilMaximov/activefunction/blob/master/CODE_OF_CONDUCT.md).
 
 ## License
 
@@ -40,4 +81,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the ActiveFunction::Functions project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/activefunction/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the ActiveFunction::Functions project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/DanilMaximov/activefunction/blob/master/CODE_OF_CONDUCT.md).
