@@ -24,3 +24,11 @@
 - add ActiveFunction::Functions::Response#commit!
 - extract action processing to separate method to handle ActiveFunction::Functions::Callbacks#process overriding
 - add test for ActiveFunction::Base.process
+
+
+# [0.3.1] - 2023-02-09
+
+- Updated readme
+- Make callbacks inheritable
+- `include` -> `prepend` Core module
+
