@@ -8,10 +8,10 @@ module ActiveFunction
     require "active_function/functions/rendering"
     require "active_function/functions/response"
 
-    include Functions::Core
+    prepend Functions::Core
+    include Functions::Callbacks
     include Functions::Rendering
     include Functions::StrongParameters
-    include Functions::Callbacks
 
     def self.process(action_name, request = {}, response = Functions::Response.new)
       new.dispatch(action_name, request, response)
