@@ -8,7 +8,7 @@ module ActiveFunction
     require "active_function/functions/rendering"
     require "active_function/functions/response"
 
-    prepend Functions::Core
+    include Functions::Core
     include Functions::Callbacks
     include Functions::Rendering
     include Functions::StrongParameters
