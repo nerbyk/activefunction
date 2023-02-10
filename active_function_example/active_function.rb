@@ -45,22 +45,18 @@ class BlogPostFunction < ActiveFunction::Base
 
   private
 
-  def authorized?
-    true
-  end
-
-  def blog_post_attributes
-    request_data
-      .require(:blog_post)
-      .permit(PERMITTED_PARAMS)
-      .to_h
-  end
-
-  def request_data
-    params.require(:body).permit(data: {})
-  end
-
   def set_blog_post
     @blog_post = DB[:blog_posts].where(id: params.require(:id)).first
   end
+
+  def authorized? = true
+
+  def blog_post_attributes = request_data
+    .require(:blog_post)
+    .permit(PERMITTED_PARAMS)
+    .to_h
+
+  def request_data = params
+    .require(:body)
+    .permit(data: {})
 end

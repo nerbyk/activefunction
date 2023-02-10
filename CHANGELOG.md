@@ -32,3 +32,8 @@
 - Make callbacks inheritable
 - `include` -> `prepend` Core module
 
+# [0.3.2] - 2023-02-10
+
+- Finish readme
+- Fix callbacks broken by `prepend` change
+- Add more tests for `#process` public interface

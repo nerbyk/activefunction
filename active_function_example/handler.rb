@@ -10,9 +10,9 @@ RESOURCE_ROUTES = {
 }.freeze
 
 def handler(event:, context:)
-  params      = JSON.parse(event, symbolize_names: true)
+  params      = event
     .slice(:body, :pathParameters, :queryStringParameters, :headers)
-    .merge(Hash[context: context])
+    .merge(context: context)
   http_method = event[:requestContext][:http][:method]
   action      = RESOURCE_ROUTES[http_method]
 

@@ -1,73 +1,144 @@
 # ActiveFunction
 
-rails/action_controller like gem which provides lightweight callbacks, strong parameters & rendering features. It's designed to be used with AWS Lambda functions, but can be used with any Ruby application.
+rails/action_controller like gem which provides lightweight callbacks, strong parameters & rendering features. It's designed to be used with AWS Lambda functions, but can be also used with any Ruby application. 
 
-## How
+Implemented with some of ruby 3.x features, but also supports ruby 2.6.x thanks to [RubyNext](https://github.com/ruby-next/ruby-next) transpiler. Type safety achieved by RBS and [Steep](https://github.com/soutaro/steep).
+
+
+
+## A Short Example
 
 Here's a simple example of a function that uses ActiveFunction:
 
 ```ruby
-# ./src/functions/posts_function.rb
-
 require 'active_function'
 
-class PostsFunction < ActiveFunction::Base
-  before_action :set_blog_post, only: %i[update], if: :authorized?
-
-  def update
-    if @blog_post.update(blog_post_attributes)
-      render json: @blog_post
-    else
-      render json: @blog_post.errors, status: 422
-    end 
-  end
-  
-  private 
-
-  def authorized = true
-  def blog_post_attributes = params.require(:blog_post).permit(:title, :body).to_h
-  
-  def set_blog_post
-    @blog_post = BlogPost.find(params[:id])
-  end
+class AppFunction < ActiveFunction::Base
+  def index 
+    render json: SomeTable.all
+  end 
 end
-
 ```
 
-Use `#process` method to call the proceed request:
+Use `#process` method to proceed the request:
+
+```ruby 
+AppFunction.process(:index) # processes index action of AppFunction instance
+```
+Also check extended [example](https://github.com/DanilMaximov/activefunction/tree/master/active_function_example)
+## Callbacks 
+ActiveFunction supports simple callbacks `:before` and `:after` which runs around provided action in `#process`. 
 
 ```ruby
-request = {
-  "id": 1,
-  "blog_post": {
-    "title": "New title",
-    "body": "New body"
-  }
-}
+class AppFunction < ActiveFunction::Base
+  before_action :set_user 
+  after_action :log_response
+  
+  # some action ...
 
-PostsFunction.process(:update, request)
+  private 
+
+  def set_user 
+    @user = User.first
+  end 
+
+  def log_response 
+    Logger.info @response 
+  end
+end
 ```
+
+Callbacks also can be user  with `only: Array[Symbol]` and `if: Symbol` options.
+
+```ruby
+class AppFunction < ActiveFunction::Base
+  before_action :set_user, only: %i[show update destroy], if: :request_valid?
+  
+  # some actions ...
+  
+  private def request_valid? = true
+end
+```
+
+Callbacks are inheritable so all callbacks calls will be inherited from base class
+```ruby
+class BaseFunction < ActiveFunction::Base
+  before_action :set_current_user
+
+  def set_current_user
+    @current_user = User.first
+  end 
+end
+
+class PostsFunction < BaseFunction
+  def index
+    render json: @current_user
+  end
+end
+```
+## Strong Parameters
+ActiveFunction supports strong parameters which can be accessed by `#params` instance method. Strong parameters hash can be passed in `#process` as second argument.
+
+```ruby
+PostFunction.process(:index, data: { id: 1, name: "Pupa" })
+```
+
+Simple usage:
+```ruby
+class PostsFunction < ActiveFunction::Base
+  def index 
+    render json: permitted_params
+  end 
+
+  def permitted_params = params
+    .require(:data)
+    .permit(:id, :name)
+    .to_h
+end 
+```
+Strong params supports nested attributes
+```ruby 
+params.permit(:id, :name, :address => [:city, :street])
+```
+
+## Rendering
+ActiveFunction supports rendering of JSON. Rendering is obligatory for any function naction and can be done by `#render` method.
+```ruby
+class PostsFunction < ActiveFunction::Base
+  def index 
+    render json: { id: 1, name: "Pupa" }
+  end 
+end
+```
+default status code is 200, but it can be changed by `:status` option
+```ruby
+class PostsFunction < ActiveFunction::Base
+  def index 
+    render json: { id: 1, name: "Pupa" }, status: 201
+  end 
+end
+```
+Headers can be passed by `:headers` option. Default headers are `{"Content-Type" => "application/json"}`.
+```ruby
+class PostsFunction < ActiveFunction::Base
+  def index 
+    render json: { id: 1, name: "Pupa" }, headers: { "X-Request-Id" => "123" }
+  end 
+end
+```
+
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'activefunction'
+gem 'activefunction', git: "https://github.com/DanilMaximov/activefunction.git"
 ```
-
-And then execute:
-
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install activefunction
-
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/rake test` to run the tests and `bin/rake steep` to run type checker. 
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
