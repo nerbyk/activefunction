@@ -12,6 +12,7 @@ AllCops:
     - 'Gemfile'
     - 'vendor/**/*'
     - 'gemfiles/**/*'
+    - '*.gemspec'
   DisplayCopNames: true
   SuggestExtensions: false
   TargetRubyVersion: next
