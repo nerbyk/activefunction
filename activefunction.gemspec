@@ -8,22 +8,31 @@ Gem::Specification.new do |spec|
   spec.authors = ["Nerbyk"]
   spec.email   = ["danil.maximov2000@gmail.com"]
 
-  spec.summary     = "activedispath like gem for aws lambda"
-  spec.description = "activedispath like gem for aws lambda functions development which provides routing, params, callbacks, rendering and other features"
-  spec.homepage    = "https://github.com/DanilMaximov/acitvefunction"
+  spec.summary = %(
+    rails/action_controller like gem which provides
+    callbacks, strong parameters & rendering features.
+  )
+  spec.description = %(
+    rails/action_controller like gem which provides lightweight callbacks,
+    strong parameters & rendering features. It's designed to be used with
+    AWS Lambda functions, but can be also used with any Ruby application.
 
+    Implemented with some of ruby 3.x features, but also supports
+    ruby 2.6.x thanks to RubyNext transpiler. Type safety achieved
+    by RBS and Steep.
+  )
+  spec.homepage = "https://github.com/DanilMaximov/acitvefunction"
+  spec.license = "MIT"
   spec.metadata = {
-    "homepage_uri"    => "https://github.com/DanilMaximov/acitvefunction",
+    "homepage_uri"    => "https://github.com/DanilMaximov/activefunction",
     "source_code_uri" => "https://github.com/DanilMaximov/activefunction",
     "changelog_uri"   => "https://github.com/DanilMaximov/activefunction/CHANGELOG.md"
   }
 
-  spec.license = "MIT"
+  spec.files = Dir.glob("lib/**/*") + Dir.glob("lib/.rbnext/**/*") + Dir.glob("bin/**/*") + %w[sig/active_function.rbs sig/manifest.yml] + %w[README.md LICENSE.txt CHANGELOG.md]
 
-  spec.files                 = Dir.glob("lib/**/*") + Dir.glob("lib/.rbnext/**/*") +
-    Dir.glob("bin/**/*") + %w[sig/active_function.rbs sig/manifest.yml] +
-    %w[README.md LICENSE.txt CHANGELOG.md]
-  spec.require_paths         = ["lib"]
+  spec.require_paths = ["lib"]
+
   spec.required_ruby_version = ">= 2.6"
 
   spec.add_runtime_dependency "ruby-next-core", ">= 0.14.0"
