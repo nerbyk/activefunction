@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["Nerbyk"]
   spec.email   = ["danil.maximov2000@gmail.com"]
 
-  spec.summary = %(
+  spec.summary     = %(
     rails/action_controller like gem which provides
     callbacks, strong parameters & rendering features.
   )
@@ -21,15 +21,15 @@ Gem::Specification.new do |spec|
     ruby 2.6.x thanks to RubyNext transpiler. Type safety achieved
     by RBS and Steep.
   )
-  spec.homepage = "https://github.com/DanilMaximov/acitvefunction"
-  spec.license = "MIT"
-  spec.metadata = {
+  spec.homepage    = "https://github.com/DanilMaximov/acitvefunction"
+  spec.license     = "MIT"
+  spec.metadata    = {
     "homepage_uri"    => "https://github.com/DanilMaximov/activefunction",
     "source_code_uri" => "https://github.com/DanilMaximov/activefunction",
     "changelog_uri"   => "https://github.com/DanilMaximov/activefunction/CHANGELOG.md"
   }
 
-  spec.files = Dir.glob("lib/**/*") + Dir.glob("lib/.rbnext/**/*") + Dir.glob("bin/**/*") + %w[sig/active_function.rbs sig/manifest.yml] + %w[README.md LICENSE.txt CHANGELOG.md]
+  spec.files = Dir.glob("lib/**/*") + Dir.glob("lib/.rbnext/**/*") + Dir.glob("bin/**/*") + Dir.glob("sig/**/*.rbs") + %w[README.md LICENSE.txt CHANGELOG.md]
 
   spec.require_paths = ["lib"]
 
