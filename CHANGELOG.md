@@ -37,3 +37,7 @@
 - Finish readme
 - Fix callbacks broken by `prepend` change
 - Add more tests for `#process` public interface
+
+# [0.3.4] - 2023-05-02
+
+- Fix RubyNext runtime integration
