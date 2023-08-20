@@ -1,41 +1,11 @@
 # frozen_string_literal: true
 
-require "bundler/gem_tasks"
-require "rake/testtask"
+require "fileutils"
 
-Rake::TestTask.new do |t|
-  t.libs << "test"
-  t.libs << "lib"
-  t.test_files = FileList["test/**/*_test.rb"]
-  t.warning    = false
-  t.verbose    = true
+REPO_ROOT = File.dirname(__FILE__)
+GEMS_DIR  = "#{REPO_ROOT}/gems"
+GEMS_DIRS = (Dir.glob("#{GEMS_DIR}/*") + Dir.glob(REPO_ROOT))
+
+Dir.glob("#{REPO_ROOT}/tasks/**/*.rake").each do |task_file|
+  load(task_file)
 end
-
-begin
-  require "rubocop/rake_task"
-  RuboCop::RakeTask.new
-rescue LoadError
-  task(:rubocop) {}
-end
-
-RuboCop::RakeTask.new
-
-task :steep do
-  require "steep"
-  require "steep/cli"
-
-  Steep::CLI.new(argv: ["check"], stdout: $stdout, stderr: $stderr, stdin: $stdin).run
-end
-
-namespace :steep do
-  task :stats do
-    exec "bundle exec steep stats --log-level=fatal --format=table'"
-  end
-end
-
-desc "Run Ruby Next nextify"
-task :nextify do
-  sh "bundle exec ruby-next nextify -V"
-end
-
-task default: %i[test rubocop steep]

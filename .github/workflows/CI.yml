@@ -39,6 +39,6 @@ jobs:
     - name: Run Ruby Next
       run: bundle exec rake nextify
     - name: Run MiniTest
-      run: bundle exec rake test
+      run: bundle exec rake test:all
 
 
