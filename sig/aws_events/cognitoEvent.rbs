@@ -1,0 +1,15 @@
+type cognitoEvent = {
+  version: Integer, 
+  eventType: String,
+  region: String,
+  identityPoolId: String,
+  identityId: String,
+  datasetName: String, 
+  datasetRecords: Hash[Symbol, cognitoDatasetRecord]
+}
+
+type cognitoDatasetRecord = {
+  oldValue: String,
+  newValue: String,
+  op: String,
+}

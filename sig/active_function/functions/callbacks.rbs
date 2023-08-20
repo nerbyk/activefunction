@@ -1,0 +1,42 @@
+module ActiveFunction
+  class MissingCallbackContext < Error
+    MESSAGE_TEMPLATE: String
+
+    attr_reader message: String
+
+    def initialize: (untyped context) -> void
+  end
+
+  module Functions
+    module Callbacks : Base, Core
+      interface _Callbacks
+        def callbacks: () -> Hash[Symbol, hash]
+      end
+
+      include _Function
+      extend _Callbacks
+
+      type callbackType = :before | :after
+
+      def self.super: () -> singleton(Core)
+      def process: (*untyped) -> untyped
+
+      private
+
+      def _run_callbacks: (callbackType `type`) -> void
+      def _executable?: (hash options) -> bool
+
+      module ClassMethods
+        include _Callbacks
+        @__callbacks: Hash[Symbol, hash]
+
+        def before_action: (Symbol method, ?hash options) -> void
+        def after_action: (Symbol method, ?hash options) -> void
+        def set_callback: (callbackType type, Symbol method, ?hash options) -> void
+        def inherited: (singleton(Base) subclass) -> void
+      end
+
+      def self.included: (singleton(Base) base) -> void
+    end
+  end
+end

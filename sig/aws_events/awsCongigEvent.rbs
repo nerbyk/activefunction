@@ -1,0 +1,12 @@
+type awsConfigEvent = {
+  accountId: String,
+  configRuleId: String,
+  configRuleName: String,
+  configRuleArn: String,
+  eventLeftScope: bool, 
+  executionRoleArn: String,
+  invokingEvent: String,
+  resultToken: String,
+  ruleParameters: String,
+  version: String
+}
