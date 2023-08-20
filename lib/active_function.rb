@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "activefunction-core"
+require "active_function_core"
 
 module ActiveFunction
   class Error < StandardError; end

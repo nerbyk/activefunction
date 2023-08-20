@@ -3,6 +3,7 @@
 source "https://rubygems.org"
 
 gem 'pry-byebug', platform: :mri
+gem 'activefunction-core', path: './gems/activefunction-core'
 
 gemspec
 
