@@ -1,0 +1,44 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ '**' ]
+
+jobs:
+  minitest:
+    runs-on: ubuntu-latest
+    env:
+      BUNDLE_JOBS: 4
+      BUNDLE_RETRY: 3
+      BUNDLE_GEMFILE: "${{ matrix.gemfile }}"
+      CI: true
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.0"]
+        gemfile: [
+            "Gemfile"
+        ]
+        rbs: [ 'false' ]
+        include:
+        - ruby: "3.1"
+          rbs: 'true'
+          gemfile: "Gemfile"
+        - ruby: "2.7"
+          rbs: 'false'
+          gemfile: "Gemfile"
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+        bundler: 2.2.15
+    - name: Run Ruby Next
+      run: bundle exec rake nextify
+    - name: Run MiniTest
+      run: bundle exec rake test
+
+

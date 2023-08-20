@@ -1,0 +1,42 @@
+require:
+  - standard/cop/block_single_line_braces
+  - ruby-next/rubocop
+
+inherit_gem:
+  standard: config/base.yml
+
+AllCops:
+  Exclude:
+    - 'bin/*'
+    - 'tmp/**/*'
+    - 'Gemfile'
+    - 'vendor/**/*'
+    - 'gemfiles/**/*'
+    - '*.gemspec'
+  DisplayCopNames: true
+  SuggestExtensions: false
+  TargetRubyVersion: next
+
+Standard/BlockSingleLineBraces:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
+Style/HashConversion:
+  Enabled: false
+
+Naming/FileName:
+  Exclude:
+   - '**/*.md'
+
+# FIXME: Enable back when Ruby Next 0.14 is released
+Layout/SpaceAfterColon:
+  Enabled: false
+  
+Layout/ExtraSpacing:
+  ForceEqualSignAlignment: true
+
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: table
+  EnforcedColonStyle: table

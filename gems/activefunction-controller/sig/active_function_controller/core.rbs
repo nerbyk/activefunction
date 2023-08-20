@@ -1,0 +1,33 @@
+module ActiveFunction::Controller
+  class MissingRouteMethod < Error
+    MESSAGE_TEMPLATE: String
+
+    attr_reader message: String
+
+    def initialize: (String context) -> void
+  end
+
+  class NotRenderedError < Error
+    MESSAGE_TEMPLATE: String
+
+    attr_reader message: String
+
+    def initialize: (String context) -> void
+  end
+
+
+    module Core : Base
+      include _Controller
+
+      @performed: bool
+      @action_name: Symbol
+      @request: Hash[Symbol, untyped]
+      @response: Response
+      
+      def dispatch: (Symbol action_name, hash request, Response response) -> Response::responseHash
+
+      private
+
+      def process: (Symbol action) -> void
+    end
+end
