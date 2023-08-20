@@ -41,3 +41,9 @@
 # [0.3.4] - 2023-05-02
 
 - Fix RubyNext runtime integration
+
+# [0.3.5] - 2023-08-20
+
+- Start gem restructuring for modularizaition
+- Introduce `activefunction-core` gem with RubyNext integration
+ 
