@@ -1,5 +1,0 @@
-type apiGatewayAuthorizerEvent = {
-  type: String, 
-  authorizationToken: String, 
-  methodArn: String
-}

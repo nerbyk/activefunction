@@ -1,0 +1,7 @@
+module ActiveFunction
+  type apiGatewayAuthorizerEvent = {
+    type: String, 
+    authorizationToken: String, 
+    methodArn: String
+  }
+end

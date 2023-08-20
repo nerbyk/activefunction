@@ -1,0 +1,27 @@
+module ActiveFunction
+  type codeCommitEvent = {
+    Records: Array[codeCommitRecord]
+  }
+
+  type codeCommitRecord = {
+    eventID: String,               
+    eventVersion: String,               
+    eventTime: String,  
+    eventTriggerName: String,               
+    eventPartNumber: Integer,               
+    eventName: String,               
+    eventTriggerConfigId: String,               
+    eventSourceARN: String,               
+    codeCommit: Array[codeCommitReference], 
+    userIdentityARN: String,               
+    eventSource: String,               
+    awsRegion: String,               
+    eventTotalParts: Integer,               
+    customData: String,               
+  }
+
+  type codeCommitReference = {
+    ref: String,               
+    commit: String            
+  }
+end 

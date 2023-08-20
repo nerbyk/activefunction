@@ -1,0 +1,21 @@
+module ActiveFunction
+  type kinesisFirehoseEvent = {
+    invocationId: String,
+    deliveryStreamArn: String,
+    region: String,
+    records: Array[kinesisFirehoseRecord]
+  }
+  type kinesisFirehoseRecord = {
+    data: String,
+    recordId: String,
+    approximateArrivalTimestamp: Integer,
+    kinesisRecordMetadata: kinesisRecordMetadata
+  }
+  type kinesisRecordMetadata = {
+    shardId: String,
+    partitionKey: String,
+    approximateArrivalTimestamp: String,
+    sequenceNumber: String,
+    subsequenceNumber: Integer
+  }
+end

@@ -1,0 +1,32 @@
+module ActiveFunction  
+  type dynamoDBEvent = { Records: Array[dynamoDBEventRecord] }
+  type dynamoDBEventRecord = {
+    eventID: String,
+    eventVersion: String,
+    eventName: String,
+    eventSource: String,
+    eventSourceARN: String,
+    awsRegion: String,
+    dynamodb: dynamoDBStreamRecord,
+  }
+  type dynamoDBStreamRecord = {
+    Keys: Hash[Symbol, attributeValue],
+    NewImage: Hash[Symbol, attributeValue],
+    OldImage: Hash[Symbol, attributeValue],
+    SequenceNumber: String,
+    SizeBytes: Integer,
+    StreamViewType: String
+  }
+  type attributeValue = {
+    B: String,
+    BOOL: bool,
+    BS: Array[String],
+    L: Array[attributeValue],
+    M: Hash[Symbol, attributeValue],
+    N: String,
+    NS: Array[String],
+    NULL: bool,
+    S: String,
+    SS: Array[String]
+  }
+end
