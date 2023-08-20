@@ -1,9 +1,12 @@
 require "rake/testtask"
 require "rubocop/rake_task"
 
-
 def gem_name(dir)
   File.basename(dir)
+end
+
+def with_all_gems(name = true, &block)
+  GEMS_DIRS.each { |gem_dir| yield name ? gem_name(gem_dir) : gem_dir }
 end
 
 GEMS_DIRS.each do |gem_dir|
@@ -22,8 +25,8 @@ end
 
 desc "Run All Tests in each gem"
 task "test:all" do
-  GEMS_DIRS.each do |gem_dir|
-    Rake::Task["test_gem:#{gem_name(gem_dir)}"].invoke
+  with_all_gems do |name|
+    Rake::Task["test_gem:#{name}"].invoke
   end
 end
 
@@ -34,8 +37,8 @@ end
 
 desc "Check Rubocop for all gems"
 task "rubocop:all" do
-  GEMS_DIRS.each do |gem_dir|
-    Rake::Task["rubocop:#{gem_name(gem_dir)}"].invoke
+  with_all_gems do |name|
+    Rake::Task["rubocop:#{name}"].invoke
   end
 end
 
@@ -46,8 +49,8 @@ end
 
 desc "Check Ruby Next for all gems"
 task "nextify:all" do
-  GEMS_DIRS.each do |gem_dir|
-    sh "bundle exec ruby-next nextify #{gem_dir} -V"
+  with_all_gems(false) do |path|
+    sh "bundle exec ruby-next nextify #{path}/lib -V"
   end
 end
 
@@ -56,3 +59,9 @@ task "nextify:gem", [:gem_name] do |_, args|
   sh "cd #{args[:gem_name]} && bundle exec ruby-next nextify -V"
 end
 
+desc "Transpile all gems"
+task "transpile:all" do
+  with_all_gems(false) do |path|
+    sh "bundle exec bin/ruby-next nextify --transpile-mode=rewrite #{path}/lib -V"
+  end
+end
