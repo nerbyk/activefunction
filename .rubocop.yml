@@ -30,7 +30,6 @@ Naming/FileName:
   Exclude:
    - '**/*.md'
 
-# FIXME: Enable back when Ruby Next 0.14 is released
 Layout/SpaceAfterColon:
   Enabled: false
   

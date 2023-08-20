@@ -1,0 +1,18 @@
+module ActiveFunction
+  type kinesisEvent = { Records: Array[kinesisEventRecords] }
+  type kinesisEventRecords = { 
+    eventID: String, 
+    eventName: String,
+    eventSource: String,
+    eventSourceARN: String,
+    eventVersion: String, 
+    invokeIdentityArn: String,
+    kinesis: kinesisEventRecord 
+  }
+  type kinesisEventRecord = {
+    approximateArrivalTimestamp: Float,
+    data: String,
+    partitionKey: String,
+    sequenceNumber: String
+  }
+end

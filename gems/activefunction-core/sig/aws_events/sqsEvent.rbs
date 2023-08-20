@@ -1,0 +1,22 @@
+module ActiveFunction
+  type sqsEvent = { Records: Array[sqsEventRecords] }
+  type sqsEventRecords = { 
+    messageId: String, 
+    receiptHandle: String, 
+    body: String, 
+    attributes: Hash[Symbol, String], 
+    messageAttributes: Hash[Symbol, sqsMessageAttribute], 
+    md5OfBody: String, 
+    md50fMessageAttributes: String,
+    eventSource: String, 
+    eventSourceARN: String, 
+    awsRegion: String 
+  }
+  type sqsMessageAttribute = { 
+    stringValue: String, 
+    binaryValue: String, 
+    stringListValues: Array[String], 
+    binaryListValues: Array[String], 
+    dataType: String 
+  }
+end

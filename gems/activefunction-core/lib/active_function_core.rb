@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-require "active_function_core"
+require "ruby-next/language/setup"
 
 RubyNext::Language.setup_gem_load_path(transpile: true)
 
-module ActiveFunction
+module ActiveFunctionCore
   class Error < StandardError; end
 
-  require "active_function/version"
-  require "active_function/base"
+  require "active_function_core/version"
 end
