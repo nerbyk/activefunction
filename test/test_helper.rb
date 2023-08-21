@@ -7,6 +7,9 @@ require "minitest/autorun"
 require "minitest/reporters"
 
 require "active_function"
+require "active_function_core"
+
+RubyNext::Language.setup_gem_load_path("test", transpile: true)
 
 require "./test/support/active_function_helper"
 

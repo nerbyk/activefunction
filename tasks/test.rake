@@ -62,6 +62,7 @@ end
 desc "Transpile all gems"
 task "transpile:all" do
   with_all_gems(false) do |path|
-    sh "bundle exec bin/ruby-next nextify --transpile-mode=rewrite #{path}/lib -V"
+    sh "bundle exec bin/ruby-next nextify --transpile-mode=rewrite #{path}/test -V"
   end
 end
+
