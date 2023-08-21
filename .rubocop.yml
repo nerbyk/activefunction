@@ -7,12 +7,12 @@ inherit_gem:
 
 AllCops:
   Exclude:
-    - 'bin/*'
-    - 'tmp/**/*'
-    - 'Gemfile'
-    - 'vendor/**/*'
-    - 'gemfiles/**/*'
-    - '*.gemspec'
+    - "bin/*"
+    - "tmp/**/*"
+    - "Gemfile"
+    - "vendor/**/*"
+    - "gemfiles/**/*"
+    - "*.gemspec"
   DisplayCopNames: true
   SuggestExtensions: false
   TargetRubyVersion: next
@@ -31,14 +31,17 @@ Style/EndlessMethod:
 
 Naming/FileName:
   Exclude:
-   - '**/*.md'
+    - "**/*.md"
 
 Layout/SpaceAfterColon:
   Enabled: false
+
+Layout/ExtraSpacing:
+  ForceEqualSignAlignment: true
 
 Layout/HashAlignment:
   EnforcedHashRocketStyle: table
   EnforcedColonStyle: table
 
-Layout/EmptyLineBetweenDefs: 
+Layout/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: true
