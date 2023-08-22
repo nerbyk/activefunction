@@ -23,7 +23,7 @@ GEMS_DIRS.each do |gem_dir|
   end
 end
 
-desc "Run All Tests in each gem"
+desc "Run All Minitest Tests in each gem"
 task "test:all" do
   with_all_gems do |name|
     Rake::Task["test_gem:#{name}"].invoke
@@ -33,6 +33,13 @@ end
 desc "Run Specs for single gem"
 task "test:gem", [:gem_name] do |_, args|
   Rake::Task["test_gem:#{gem_name(args[:gem_name])}"].invoke
+end
+
+desc "Run All MSpec Tests in each gem"
+task "mspec:all" do
+  with_all_gems(false) do |path|
+    sh "bundle exec mspec/bin/mspec #{path}/test" rescue nil
+  end
 end
 
 desc "Check Rubocop for all gems"

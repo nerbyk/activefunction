@@ -28,6 +28,12 @@ jobs:
     - name: Run Ruby Next
       run: | 
         bundle exec rake nextify:all
+    - name: Download MSpec
+      run: |
+        git clone https://github.com/ruby/mspec.git mspec
     - name: Run Minitest tests
       run: |
         bundle exec rake test:all
+    - name: Run MSpec tests
+      run: |
+        bundle exec rake mspec:all
