@@ -13,9 +13,9 @@ Gem::Specification.new do |spec|
   spec.homepage    = "https://github.com/DanilMaximov/activefunction"
   spec.license     = "MIT"
   spec.metadata    = {
-    "homepage_uri"    => "https://github.com/DanilMaximov/activefunction-core",
+    "homepage_uri" => "https://github.com/DanilMaximov/activefunction-core",
     "source_code_uri" => "https://github.com/DanilMaximov/activefunction-core",
-    "changelog_uri"   => "https://github.com/DanilMaximov/activefunction-core/CHANGELOG.md"
+    "changelog_uri" => "https://github.com/DanilMaximov/activefunction-core/CHANGELOG.md"
   }
 
   spec.files = Dir.glob("lib/**/*") + Dir.glob("lib/.rbnext/**/*") + %w[sig/active_function_core.rbs sig/manifest.yml] + %w[README.md LICENSE.txt CHANGELOG.md]
@@ -24,5 +24,5 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = ">= 2.6"
 
-  spec.add_runtime_dependency 'ruby-next-core', '>= 1.0.0'
+  spec.add_runtime_dependency "ruby-next-core", ">= 1.0.0"
 end

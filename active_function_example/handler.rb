@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 RESOURCE_ROUTES = {
-  "GET /"       => :index,
-  "POST /"      => :create,
-  "GET /:id"    => :show,
-  "PUT /:id"    => :update,
-  "PATCH /:id"  => :update,
+  "GET /" => :index,
+  "POST /" => :create,
+  "GET /:id" => :show,
+  "PUT /:id" => :update,
+  "PATCH /:id" => :update,
   "DELETE /:id" => :destroy
 }.freeze
 

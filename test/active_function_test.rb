@@ -34,8 +34,8 @@ class ActiveFunctionTest < Minitest::Test
 
     assert_equal(response, {
       statusCode: 201,
-      body:       {a: 1, b: 2}.to_json,
-      headers:    {"Content-Type" => "application/json", "X-Test" => "test"}
+      body: {a: 1, b: 2}.to_json,
+      headers: {"Content-Type" => "application/json", "X-Test" => "test"}
     })
   end
 
@@ -44,8 +44,8 @@ class ActiveFunctionTest < Minitest::Test
 
     assert_equal(response, {
       statusCode: 200,
-      body:       {first: 1}.to_json,
-      headers:    {"Content-Type" => "application/json"}
+      body: {first: 1}.to_json,
+      headers: {"Content-Type" => "application/json"}
     })
   end
 
@@ -54,8 +54,8 @@ class ActiveFunctionTest < Minitest::Test
 
     assert_equal(response, {
       statusCode: 200,
-      body:       {first: 1}.to_json,
-      headers:    {"Content-Type" => "application/json"}
+      body: {first: 1}.to_json,
+      headers: {"Content-Type" => "application/json"}
     })
   end
 
@@ -66,8 +66,8 @@ class ActiveFunctionTest < Minitest::Test
 
     assert_equal(response, {
       statusCode: 200,
-      body:       {id: 1, message: {text: "test"}}.to_json,
-      headers:    {"Content-Type" => "application/json"}
+      body: {id: 1, message: {text: "test"}}.to_json,
+      headers: {"Content-Type" => "application/json"}
     })
   end
 end

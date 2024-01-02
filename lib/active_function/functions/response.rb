@@ -15,8 +15,8 @@ module ActiveFunction
       def to_h
         {
           statusCode: status,
-          headers:    headers,
-          body:       body
+          headers: headers,
+          body: body
         }
       end
 
