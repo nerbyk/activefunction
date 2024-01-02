@@ -67,9 +67,9 @@ module ActiveFunctionCore
         # rubocop:disable Lint/ConstantDefinitionInBlock
         Hooks = Data.define(:hooks) do
           def initialize(hooks: {}) = super
-          def deep_dup = Marshal.load(Marshal.dump(self))
-          def all = hooks
-          def [](method_name) = hooks[method_name]
+          def deep_dup              = Marshal.load(Marshal.dump(self))
+          def all                   = hooks
+          def [](method_name)       = hooks[method_name]
 
           def add_hook(method_name)
             hooks[method_name] = Hook[method_name]
@@ -79,15 +79,15 @@ module ActiveFunctionCore
         Hook = Data.define(:method_name, :callbacks) do
           Callbacks = Data.define(:before, :after) do
             def initialize(before: [], after: []) = super
-            def [](type) = public_send(type)
+            def [](type)                          = public_send(type)
           end
-          Callback = Data.define(:target, :options)
+          Callback  = Data.define(:target, :options)
 
           def initialize(method_name:, callbacks: Callbacks.new) = super
-          def hashes(type) = Set.new callbacks[type].map(&:hash)
+          def hashes(type)                                       = Set.new callbacks[type].map(&:hash)
 
           def add_callback(type:, target:, options: {})
-            new_callbacks = Callback[target, options]
+            new_callbacks = Callback[target:, options:]
             callbacks[type] << new_callbacks unless hashes(type) === new_callbacks.hash
           end
         end

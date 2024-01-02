@@ -52,7 +52,7 @@ end
 
 class CallbackTest2 < Minitest::Test
   def setup
-    @obj = CallbackTestClass2.new
+    @obj      = CallbackTestClass2.new
     @response = @obj.payout
   end
 

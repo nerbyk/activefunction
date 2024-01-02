@@ -1,5 +1,4 @@
-name: Build
-
+name: "CI ruby v2.6-3.2"
 on:
   push:
     branches:

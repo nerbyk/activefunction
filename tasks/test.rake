@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rake/testtask"
 require "rubocop/rake_task"
 
@@ -65,4 +67,3 @@ task "transpile:all" do
     sh "bundle exec bin/ruby-next nextify --transpile-mode=rewrite #{path}/test -V"
   end
 end
-
