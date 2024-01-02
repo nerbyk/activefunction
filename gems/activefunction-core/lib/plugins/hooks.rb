@@ -72,6 +72,7 @@ module ActiveFunctionCore
         end
       end
 
+      # rubocop:enable Lint/ConstantDefinitionInBlock
       def self.included(base)
         base.extend(ClassMethods)
         base.include(InstanceMethods)
@@ -108,9 +109,6 @@ module ActiveFunctionCore
       end
 
       module ClassMethods
-
-        # rubocop:enable Lint/ConstantDefinitionInBlock
-
         # Defines before & after hooks for a method.
         #
         # @param method [Symbol] the name of the callbackable method.
