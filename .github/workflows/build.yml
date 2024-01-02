@@ -24,6 +24,9 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
+    - name: Add custom gem
+      run: |
+        bundle config local.activefunction-core gems/activefunction-core
     - name: Run Ruby Next
       run: | 
         bundle exec rake nextify:all
