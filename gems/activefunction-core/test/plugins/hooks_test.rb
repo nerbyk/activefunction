@@ -83,11 +83,11 @@ class CallbackTest2Inherit < Minitest::Test
   end
 
   def test_iherit_callback_uniqness
-    assert_equal @obj.class.hooks[:payout].callbacks.before.size, 1
+    assert_equal @obj.class.hooks[:payout].before.callbacks.size, 1
 
     @obj.class.before_payout :set_pupa_salary # duplicate callback
 
-    assert_equal @obj.class.hooks[:payout].callbacks.before.size, 1
+    assert_equal @obj.class.hooks[:payout].before.callbacks.size, 1
   end
 
   def test_iherit_callback_hooks_object_id
