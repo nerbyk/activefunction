@@ -5,14 +5,6 @@ require "forwardable"
 module ActiveFunctionCore
   module Plugins
     module Hooks
-      TYPES = %i[before after].freeze
-
-      class MissingCallbackContext < Error
-        MESSAGE_TEMPLATE = "Missing callback context: %s"
-
-        def initialize(context) = super(MESSAGE_TEMPLATE % context)
-      end
-
       class MissingHookableMethod < Error
         MESSAGE_TEMPLATE = "Method %s is not defined"
 
@@ -42,6 +34,40 @@ module ActiveFunctionCore
         end
       end
 
+      CallbackRunner = Data.define(:callbacks, :instance) do
+        class MissingCallbackContext < Error
+          MESSAGE_TEMPLATE = "Missing callback context: %s"
+
+          def initialize(context) = super(MESSAGE_TEMPLATE % context)
+        end
+
+        def execute_callbacks(type)
+          callbacks[type].each(&method(:execute_callback))
+        end
+
+        private
+
+        def execute_callback(callback)
+          validate_callback!(callback)
+            .then { process_callback_filters(callback.options) }
+            .then { |filters_result| execute_callback_method(callback.target) if filters_result }
+        end
+
+        def validate_callback!(callback)
+          raise(MissingCallbackContext, callback.target) unless instance.respond_to?(callback.target, true)
+        end
+
+        def process_callback_filters(options)
+          return false if options[:if] && !instance.send(options[:if])
+
+          true
+        end
+
+        def execute_callback_method(target)
+          instance.send(target)
+        end
+      end
+
       def self.included(base)
         base.extend(ClassMethods)
         base.include(InstanceMethods)
@@ -51,10 +77,11 @@ module ActiveFunctionCore
         def hooks = @__hooks ||= {}
 
         def inherited(subclass)
-          deep_dup_hooks(subclass)
+          subclass.instance_variable_set(:@__hooks, Marshal.load(Marshal.dump(hooks)))
         end
 
-        # Defines before & after hooks for a method.
+        # Redefines method providing callbacks calls around it.
+
         #
         # @param method [Symbol] the name of the callbackable method.
         # @param name [Symbol] custom name of callbacks before_[name] & after_[name] methods.
@@ -62,12 +89,15 @@ module ActiveFunctionCore
           raise(HookedMethodArgumentError, method) if hooks.key?(method)
           raise(MissingHookableMethod, method) unless method_defined?(method)
 
-          override_hookable_method(method, name:)
-          hooks[name] = Hook[method_name: name]
-          define_callback_methods_for(name)
+          create_hook(name)
+
+          add_callback_calls_to(method, name:)
+
+          define_callback_methods_for(:before, name)
+          define_callback_methods_for(:after, name)
         end
 
-        # Defines specific callback for a method.
+        # Sets a callback for an existing hook'ed method.
         #
         # @param type [Symbol] the type of callback, `:before` or `:after`
         # @param method_name [Symbol] the name of the callbackable method.
@@ -80,59 +110,37 @@ module ActiveFunctionCore
 
         private
 
-        def deep_dup_hooks(subclass)
-          subclass.instance_variable_set(:@__hooks, Marshal.load(Marshal.dump(hooks)))
+        def create_hook(name)
+          hooks[name] = Hook[method_name: name]
         end
 
-        def override_hookable_method(method, name:)
+        def add_callback_calls_to(method, name:)
           define_method(method) do |*args|
-            with_callbacks(name) { super(*args) }
+            hook = self.class.hooks[name]
+            with_callbacks(hook.callbacks) { super(*args) }
           end
         end
 
-        def define_callback_methods_for(method)
-          TYPES.each do |type|
-            define_singleton_method("#{type}_#{method}") do |target, options = {}|
-              set_callback(type, method, target, options)
-            end
+        def define_callback_methods_for(type, method)
+          define_singleton_method("#{type}_#{method}") do |target, options = {}|
+            set_callback(type, method, target, options)
           end
         end
       end
 
       module InstanceMethods
-        def with_callbacks(method_name, &block)
-          _run_callbacks(method_name, :before)
+        # Executes callbacks around the block.
+        #
+        # @param callbacks [Hash{Symbol => Array<Hook::Callback>}] the callbacks to execute, with keys ':before' and ':after'.
+        # @param block [Proc] the block to execute.
+        def with_callbacks(callbacks, &block)
+          callbacks_runner = CallbackRunner[callbacks:, instance: self]
+
+          callbacks_runner.execute_callbacks(:before)
           result = yield
-          _run_callbacks(method_name, :after)
+          callbacks_runner.execute_callbacks(:after)
 
           result
-        end
-
-        private
-
-        def _run_callbacks(method, type)
-          callbacks = self.class.hooks[method].callbacks[type]
-          callbacks.each(&method(:_execute_callback))
-        end
-
-        def _execute_callback(callback)
-          _validate_callback!(callback)
-            .then { _process_callback_filters(callback.options) }
-            .then { |filters_result| _execute_callback_method(callback.target) if filters_result }
-        end
-
-        def _validate_callback!(callback)
-          raise(MissingCallbackContext, callback.target) unless respond_to?(callback.target, true)
-        end
-
-        def _process_callback_filters(options)
-          return false if options[:if] && !send(options[:if])
-
-          true
-        end
-
-        def _execute_callback_method(target)
-          send(target)
         end
       end
     end
