@@ -25,7 +25,7 @@ module ActiveFunctionCore
         def initialize(method) = super(MESSAGE_TEMPLATE % method)
       end
 
-      class Hook < Data.define(:method_name, :before, :after)
+      Hook = Data.define(:method_name, :before, :after) do
         # rubocop:disable Lint/ConstantDefinitionInBlock
         Callback = Data.define(:target, :options)
         # rubocop:enable Lint/ConstantDefinitionInBlock
