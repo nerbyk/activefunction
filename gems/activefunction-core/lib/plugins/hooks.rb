@@ -18,9 +18,7 @@ module ActiveFunctionCore
       end
 
       Hook = Data.define(:method_name, :before, :after) do
-        # rubocop:disable Lint/ConstantDefinitionInBlock
-        Callback = Data.define(:target, :options)
-        # rubocop:enable Lint/ConstantDefinitionInBlock
+        Callback = Data.define(:target, :options) # rubocop:disable Lint/ConstantDefinitionInBlock
 
         def initialize(method_name:, before: [], after: []) = super
         def callbacks = {before:, after:}
@@ -35,7 +33,7 @@ module ActiveFunctionCore
       end
 
       CallbackRunner = Data.define(:callbacks, :instance) do
-        class MissingCallbackContext < Error
+        class MissingCallbackContext < Error # rubocop:disable Lint/ConstantDefinitionInBlock
           MESSAGE_TEMPLATE = "Missing callback context: %s"
 
           def initialize(context) = super(MESSAGE_TEMPLATE % context)
