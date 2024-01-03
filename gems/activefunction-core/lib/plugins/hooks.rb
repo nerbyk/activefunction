@@ -79,7 +79,7 @@ module ActiveFunctionCore
         end
 
         # Redefines method providing callbacks calls around it.
-
+        # Defines `before_[name]` and `after_[name]` methods for setting callbacks.
         #
         # @param method [Symbol] the name of the callbackable method.
         # @param name [Symbol] custom name of callbacks before_[name] & after_[name] methods.
