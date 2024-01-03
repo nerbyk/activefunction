@@ -75,7 +75,9 @@ class CallbackTest3 < Minitest::Test
     @obj = CallbackTestClass3.new
   end
 
-  def response = @obj.payout
+  def response
+    @obj.payout
+  end
 
   def test_set_callback_method
     response

@@ -25,7 +25,7 @@ module ActiveFunctionCore
         def initialize(method) = super(MESSAGE_TEMPLATE % method)
       end
 
-      class Hook < Data.define(:method_name, :before, :after)
+      Hook = Data.define(:method_name, :before, :after) do
         Callback = Data.define(:target, :options)
 
         def initialize(method_name:, before: [], after: []) = super
@@ -61,7 +61,7 @@ module ActiveFunctionCore
           raise(MissingHookableMethod, method) unless method_defined?(method)
 
           override_hookable_method(method, name:)
-          hooks[name] = Hook[name]
+          hooks[name] = Hook[method_name: name]
           define_callback_methods_for(name)
         end
 
