@@ -41,7 +41,7 @@ class CallbackTest1 < Minitest::Test
   end
 
   def test_callback
-    assert_equal @res.dig(:salaries, :pupa), {name: "Lupa", amount: 100} # pupa gets lupa's salary
+    assert_equal({name: "Lupa", amount: 100}, @res.dig(:salaries, :pupa)) # pupa gets lupa's salary
   end
 end
 
@@ -52,17 +52,44 @@ end
 
 class CallbackTest2 < Minitest::Test
   def setup
-    @obj      = CallbackTestClass2.new
+    @obj = CallbackTestClass2.new
     @response = @obj.payout
   end
 
   def test_before_action_callback
-    assert_equal @response.dig(:salaries, :pupa), {name: "Lupa", amount: 100}
+    assert_equal({name: "Lupa", amount: 100}, @response.dig(:salaries, :pupa))
   end
 
   def test_after_action_callback
-    assert_equal @response.dig(:salaries, :lupa), nil
-    assert_equal @obj.instance_variable_get(:@lupa_salary), {name: "Pupa", amount: 200}
+    assert_nil @response.dig(:salaries, :lupa)
+    assert_equal({name: "Pupa", amount: 200}, @obj.instance_variable_get(:@lupa_salary))
+  end
+end
+
+class CallbackTestClass3 < HooksSetupClass
+  set_callback :before, :payout, :set_lupa_salary
+end
+
+class CallbackTest3 < Minitest::Test
+  def setup
+    @obj = CallbackTestClass3.new
+  end
+
+  def response = @obj.payout
+
+  def test_set_callback_method
+    response
+    assert_equal({name: "Pupa", amount: 200}, @obj.instance_variable_get(:@lupa_salary))
+  end
+
+  def test_set_callback_missing_method
+    @obj.class.set_callback :before, :payout, :missing_method
+
+    assert_raises ActiveFunctionCore::Plugins::Hooks::MissingCallbackContext do
+      response
+    end
+
+    @obj.class.hooks[:payout].callbacks[:before].delete_at(-1)
   end
 end
 
@@ -77,17 +104,19 @@ class CallbackTest2Inherit < Minitest::Test
   def test_inherit_callbacks
     @response = @obj.payout
 
-    assert_equal @response.dig(:salaries, :pupa), {name: "Lupa", amount: 100}
-    assert_equal @response.dig(:salaries, :lupa), nil
-    assert_equal @obj.instance_variable_get(:@lupa_salary), {name: "Pupa", amount: 200}
+    assert_equal({name: "Lupa", amount: 100}, @response.dig(:salaries, :pupa))
+    assert_nil @response.dig(:salaries, :lupa)
+    assert_equal({name: "Pupa", amount: 200}, @obj.instance_variable_get(:@lupa_salary))
   end
 
   def test_iherit_callback_uniqness
-    assert_equal @obj.class.hooks[:payout].before.callbacks.size, 1
+    assert_equal 1, @obj.class.hooks[:payout].before.size
 
-    @obj.class.before_payout :set_pupa_salary # duplicate callback
+    assert_raises ArgumentError do
+      @obj.class.before_payout :set_pupa_salary # duplicate callback
+    end
 
-    assert_equal @obj.class.hooks[:payout].before.callbacks.size, 1
+    assert_equal 1, @obj.class.hooks[:payout].before.size
   end
 
   def test_iherit_callback_hooks_object_id
@@ -118,6 +147,6 @@ class ConditionalCallbacksTest3 < Minitest::Test
 
   def test_if_before_action_callback
     assert_nil @obj.instance_variable_get(:@lupa_salary)
-    assert_equal @obj.instance_variable_get(:@pupa_salary), {name: "Lupa", amount: 100}
+    assert_equal({name: "Lupa", amount: 100}, @obj.instance_variable_get(:@pupa_salary))
   end
 end
