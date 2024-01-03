@@ -27,8 +27,8 @@ module ActiveFunction
 
       def dispatch(action_name, request, response)
         @action_name = action_name
-        @request     = request
-        @response    = response
+        @request = request
+        @response = response
 
         raise MissingRouteMethod, @action_name unless respond_to?(action_name)
 

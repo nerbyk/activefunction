@@ -36,7 +36,7 @@ module ActiveFunction
 
         def initialize(parameters, permitted: false)
           @parameters = parameters
-          @permitted  = permitted
+          @permitted = permitted
         end
 
         def [](attribute)

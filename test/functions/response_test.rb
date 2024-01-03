@@ -26,9 +26,9 @@ class ResponseTest < Minitest::Test
   end
 
   def test_to_h
-    @response.status  = 201
+    @response.status = 201
     @response.headers = {"X-Test" => "test"}
-    @response.body    = "test"
+    @response.body = "test"
 
     assert_equal @response.to_h, {statusCode: 201, headers: {"X-Test" => "test"}, body: "test"}
   end

@@ -5,7 +5,7 @@ require "ruby-next/language/setup"
 RubyNext::Language.setup_gem_load_path(transpile: true)
 
 module ActiveFunctionCore
-  class Error < StandardError; end
+  Error = Class.new(StandardError)
 
   require "plugins/hooks"
 

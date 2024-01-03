@@ -3,16 +3,16 @@
 require_relative "lib/active_function_core/version"
 
 Gem::Specification.new do |spec|
-  spec.name    = "activefunction-core"
+  spec.name = "activefunction-core"
   spec.version = ActiveFunctionCore::VERSION
   spec.authors = ["Nerbyk"]
-  spec.email   = ["danil.maximov2000@gmail.com"]
+  spec.email = ["danil.maximov2000@gmail.com"]
 
-  spec.summary     = %(ActiveFunction core gem)
+  spec.summary = %(ActiveFunction core gem)
   spec.description = %(Provides core functionality, plugins and ruby-next integration for ActiveFunction)
-  spec.homepage    = "https://github.com/DanilMaximov/activefunction"
-  spec.license     = "MIT"
-  spec.metadata    = {
+  spec.homepage = "https://github.com/DanilMaximov/activefunction"
+  spec.license = "MIT"
+  spec.metadata = {
     "homepage_uri" => "https://github.com/DanilMaximov/activefunction-core",
     "source_code_uri" => "https://github.com/DanilMaximov/activefunction-core",
     "changelog_uri" => "https://github.com/DanilMaximov/activefunction-core/CHANGELOG.md"

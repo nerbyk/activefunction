@@ -2,7 +2,7 @@
 
 desc "Builds gems by name"
 task "gems:build", [:gem_name] do |_, args|
-  gem_name    = args[:gem_name]
+  gem_name = args[:gem_name]
   current_dir = FileUtils.pwd
 
   raise "Gem #{gem_name} not found" unless Dir.exist?("#{$GEMS_DIR}/#{gem_name}")

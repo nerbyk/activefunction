@@ -10,11 +10,11 @@ RESOURCE_ROUTES = {
 }.freeze
 
 def handler(event:, context:)
-  params      = event
+  params = event
     .slice(:body, :pathParameters, :queryStringParameters, :headers)
     .merge(context: context)
   http_method = event[:requestContext][:http][:method]
-  action      = RESOURCE_ROUTES[http_method]
+  action = RESOURCE_ROUTES[http_method]
 
   BlogPostFunction.process(action, params)
 end

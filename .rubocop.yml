@@ -36,8 +36,5 @@ Naming/FileName:
 Layout/SpaceAfterColon:
   Enabled: false
 
-Layout/ExtraSpacing:
-  ForceEqualSignAlignment: true
-
 Layout/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: true

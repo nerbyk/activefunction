@@ -16,8 +16,8 @@ GEMS_DIRS.each do |gem_dir|
     t.libs << "#{gem_dir}/test"
     t.libs << "#{gem_dir}/lib"
     t.test_files = FileList["#{gem_dir}/test/**/*_test.rb"]
-    t.warning    = false
-    t.verbose    = true
+    t.warning = false
+    t.verbose = true
   end
 
   RuboCop::RakeTask.new("rubocop:#{gem_name(gem_dir)}") do |t|

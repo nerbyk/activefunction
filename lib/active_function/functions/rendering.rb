@@ -20,9 +20,9 @@ module ActiveFunction
       def render(status: 200, json: {}, head: {})
         raise DoubleRenderError, @action_name if performed?
 
-        @response.status     = status
-        @response.headers    = head.merge(Hash[DEFAULT_HEADER])
-        @response.body       = JSON.generate(json)
+        @response.status = status
+        @response.headers = head.merge(Hash[DEFAULT_HEADER])
+        @response.body = JSON.generate(json)
 
         @response.commit!
       end
