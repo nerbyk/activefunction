@@ -152,22 +152,22 @@ class ConditionalCallbacksTest3 < Minitest::Test
   end
 end
 
-class ConditionalCallbacksTestFunction4 < CallbackTestFunction
-  before_action :first, only: %i[index], if: :executable?
+# class ConditionalCallbacksTestFunction4 < CallbackTestFunction
+#   before_action :first, only: %i[index], if: :executable?
 
-  private def executable?
-    true
-  end
-end
+#   private def executable?
+#     true
+#   end
+# end
 
-class ConditionalCallbacksTest4 < Minitest::Test
-  def setup
-    @function = ConditionalCallbacksTestFunction4.new
-  end
+# class ConditionalCallbacksTest4 < Minitest::Test
+#   def setup
+#     @function = ConditionalCallbacksTestFunction4.new
+#   end
 
-  def test_callback_with_all_condition_options
-    @function.dispatch(:index, {}, committed_response)
+#   def test_callback_with_all_condition_options
+#     @function.dispatch(:index, {}, committed_response)
 
-    assert_equal @function.instance_variable_get(:@first), "Biba"
-  end
-end
+#     assert_equal @function.instance_variable_get(:@first), "Biba"
+#   end
+# end

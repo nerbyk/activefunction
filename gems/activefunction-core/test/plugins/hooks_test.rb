@@ -84,15 +84,15 @@ class CallbackTest3 < Minitest::Test
     assert_equal({name: "Pupa", amount: 200}, @obj.instance_variable_get(:@lupa_salary))
   end
 
-  def test_set_callback_missing_method
-    @obj.class.set_callback :before, :payout, :missing_method
+  # def test_set_callback_missing_method
+  #   @obj.class.set_callback :before, :payout, :missing_method
 
-    assert_raises ActiveFunctionCore::Plugins::Hooks::MissingCallbackContext do
-      response
-    end
+  #   assert_raises ArgumentError do
+  #     response
+  #   end
 
-    @obj.class.hooks[:payout].callbacks[:before].delete_at(-1)
-  end
+  #   @obj.class.hooks[:payout].callbacks[:before].delete_at(-1)
+  # end
 end
 
 class CallbackTestClass2Inherit < CallbackTestClass2

@@ -5,20 +5,21 @@ require "forwardable"
 module ActiveFunctionCore
   module Plugins
     module Hooks
-      class MissingHookableMethod < Error
-        MESSAGE_TEMPLATE = "Method %s is not defined"
+      class Hook < Data.define(:method_name, :before, :after)
+        DEFAULT_CALLBACK_OPTIONS = {
+          if: ->(v, context:) { context.send(v) if context.respond_to?(v, true) },
+          unless: ->(v, context:) { !context.send(v) if context.respond_to?(v, true) }
+        }.freeze
 
-        def initialize(method_name) = super(MESSAGE_TEMPLATE % method_name)
-      end
+        Callback = Data.define(:target, :options) do
+          def run(context)
+            context.instance_exec(target, options) do |target, options|
+              raise(ArgumentError, "Callback target #{target} is not defined") unless respond_to?(target, true)
 
-      class HookedMethodArgumentError < Error
-        MESSAGE_TEMPLATE = "Hooks for %s are already defined"
-
-        def initialize(method) = super(MESSAGE_TEMPLATE % method)
-      end
-
-      Hook = Data.define(:method_name, :before, :after) do
-        Callback = Data.define(:target, :options) # rubocop:disable Lint/ConstantDefinitionInBlock
+              method(target).call if options.all? { |opt| opt[context] }
+            end
+          end
+        end
 
         def initialize(method_name:, before: [], after: []) = super
         def callbacks = {before:, after:}
@@ -26,56 +27,34 @@ module ActiveFunctionCore
         def add_callback(type:, target:, options: {})
           new_callback = Callback[target:, options:]
 
-          raise ArgumentError, "Callback already defined" if callbacks[type].map(&:hash).to_set === new_callback.hash
+          raise(ArgumentError, "Callback already defined") if callbacks[type].map(&:hash).to_set === new_callback.hash
 
           callbacks[type] << new_callback
         end
-      end
 
-      CallbackRunner = Data.define(:callbacks, :instance) do
-        class MissingCallbackContext < Error # rubocop:disable Lint/ConstantDefinitionInBlock
-          MESSAGE_TEMPLATE = "Missing callback context: %s"
-
-          def initialize(context) = super(MESSAGE_TEMPLATE % context)
+        def run_callbacks(context, &block)
+          run_with(before, context:)
+          yield_result = yield
+          run_with(after, context:)
+          yield_result
         end
 
-        def execute_callbacks(type)
-          callbacks[type].each(&method(:execute_callback))
-        end
-
-        private
-
-        def execute_callback(callback)
-          validate_callback!(callback)
-            .then { process_callback_filters(callback.options) }
-            .then { |filters_result| execute_callback_method(callback.target) if filters_result }
-        end
-
-        def validate_callback!(callback)
-          raise(MissingCallbackContext, callback.target) unless instance.respond_to?(callback.target, true)
-        end
-
-        def process_callback_filters(options)
-          return false if options[:if] && !instance.send(options[:if])
-
-          true
-        end
-
-        def execute_callback_method(target)
-          instance.send(target)
+        private def run_with(ccs, context:)
+          ccs.each { |c| c.run(context) }
         end
       end
 
       def self.included(base)
         base.extend(ClassMethods)
-        base.include(InstanceMethods)
       end
 
       module ClassMethods
         def hooks = @__hooks ||= {}
+        def callback_options = @__callback_options ||= Hook::DEFAULT_CALLBACK_OPTIONS.dup
 
         def inherited(subclass)
           subclass.instance_variable_set(:@__hooks, Marshal.load(Marshal.dump(hooks)))
+          subclass.instance_variable_set(:@__callback_options, callback_options.dup)
         end
 
         # Redefines method providing callbacks calls around it.
@@ -84,15 +63,24 @@ module ActiveFunctionCore
         # @param method [Symbol] the name of the callbackable method.
         # @param name [Symbol] custom name of callbacks before_[name] & after_[name] methods.
         def define_hooks_for(method, name: method)
-          raise(HookedMethodArgumentError, method) if hooks.key?(method)
-          raise(MissingHookableMethod, method) unless method_defined?(method)
+          raise(ArgumentError, "Hook for #{method} are already defined") if hooks.key?(method)
+          raise(ArgumentError, "Method #{method} is not defined") unless method_defined?(method)
 
-          create_hook(name)
+          hooks[name] = Hook[method_name: name]
 
-          add_callback_calls_to(method, name:)
+          define_singleton_method(:"before_#{name}") do |target, options = {}|
+            set_callback(:before, name, target, options)
+          end
 
-          define_callback_methods_for(:before, name)
-          define_callback_methods_for(:after, name)
+          define_singleton_method(:"after_#{name}") do |target, options = {}|
+            set_callback(:after, name, target, options)
+          end
+
+          define_method(method) do |*args, &block|
+            self.class.hooks[name].run_callbacks(self) do
+              super(*args, &block)
+            end
+          end
         end
 
         # Sets a callback for an existing hook'ed method.
@@ -103,42 +91,24 @@ module ActiveFunctionCore
         # @param options [Hash] the options for the callback.
         # @options options [Symbol] :if the name of the method to check before executing the callback.
         def set_callback(type, method_name, target, options = {})
-          hooks[method_name].add_callback(type:, target:, options:)
+          raise(ArgumentError, "Hook for :#{method} is not defined") unless hooks.key?(method_name)
+          raise(ArgumentError, "Options #{unknown} are not defined") if (unknown = (options.keys - callback_options.keys)) && unknown.any?
+
+          hooks[method_name].add_callback(type:, target:, options: _normalized_options(options))
         end
 
-        private
-
-        def create_hook(name)
-          hooks[name] = Hook[method_name: name]
-        end
-
-        def add_callback_calls_to(method, name:)
-          define_method(method) do |*args|
-            hook = self.class.hooks[name]
-            with_callbacks(hook.callbacks) { super(*args) }
-          end
-        end
-
-        def define_callback_methods_for(type, method)
-          define_singleton_method("#{type}_#{method}") do |target, options = {}|
-            set_callback(type, method, target, options)
-          end
-        end
-      end
-
-      module InstanceMethods
-        # Executes callbacks around the block.
+        # Sets a custom callback option.
         #
-        # @param callbacks [Hash{Symbol => Array<Hook::Callback>}] the callbacks to execute, with keys ':before' and ':after'.
-        # @param block [Proc] the block to execute.
-        def with_callbacks(callbacks, &block)
-          callbacks_runner = CallbackRunner[callbacks:, instance: self]
+        # @param name [Symbol] the name of the option.
+        # @param block [Proc] the block to call with the option value and the context.
+        def set_callback_options(name, &block)
+          callback_options[name] = block
+        end
 
-          callbacks_runner.execute_callbacks(:before)
-          result = yield
-          callbacks_runner.execute_callbacks(:after)
-
-          result
+        private def _normalized_options(options)
+          options.map do |key, value|
+            ->(instance) { callback_options[key].call(value, context: instance) }
+          end
         end
       end
     end
