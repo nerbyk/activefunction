@@ -84,15 +84,15 @@ class CallbackTest3 < Minitest::Test
     assert_equal({name: "Pupa", amount: 200}, @obj.instance_variable_get(:@lupa_salary))
   end
 
-  # def test_set_callback_missing_method
-  #   @obj.class.set_callback :before, :payout, :missing_method
+  def test_set_callback_missing_method
+    @obj.class.set_callback :before, :payout, :missing_method
 
-  #   assert_raises ArgumentError do
-  #     response
-  #   end
+    assert_raises ArgumentError do
+      response
+    end
 
-  #   @obj.class.hooks[:payout].callbacks[:before].delete_at(-1)
-  # end
+    @obj.class.hooks[:payout].callbacks[:before].delete_at(-1)
+  end
 end
 
 class CallbackTestClass2Inherit < CallbackTestClass2
@@ -112,13 +112,13 @@ class CallbackTest2Inherit < Minitest::Test
   end
 
   def test_iherit_callback_uniqness
-    assert_equal 1, @obj.class.hooks[:payout].before.size
+    assert_equal 1, @obj.class.hooks[:payout].callbacks[:before].size
 
     assert_raises ArgumentError do
       @obj.class.before_payout :set_pupa_salary # duplicate callback
     end
 
-    assert_equal 1, @obj.class.hooks[:payout].before.size
+    assert_equal 1, @obj.class.hooks[:payout].callbacks[:before].size
   end
 
   def test_iherit_callback_hooks_object_id

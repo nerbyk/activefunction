@@ -5,11 +5,12 @@ require "forwardable"
 module ActiveFunctionCore
   module Plugins
     module Hooks
-      class Hook < Data.define(:method_name, :before, :after)
+      class Hook < Data.define(:method_name, :callbacks)
         DEFAULT_CALLBACK_OPTIONS = {
           if: ->(v, context:) { context.send(v) if context.respond_to?(v, true) },
           unless: ->(v, context:) { !context.send(v) if context.respond_to?(v, true) }
         }.freeze
+        SUPPORTED_CALLBACKS = %i[before after].freeze
 
         Callback = Data.define(:target, :options) do
           def run(context)
@@ -21,26 +22,26 @@ module ActiveFunctionCore
           end
         end
 
-        def initialize(method_name:, before: [], after: []) = super
-        def callbacks = {before:, after:}
+        def initialize(name, callbacks: SUPPORTED_CALLBACKS.dup)
+          super(callbacks: callbacks.to_h { [_1, []] }, method_name: name)
+        end
 
         def add_callback(type:, target:, options: {})
-          new_callback = Callback[target:, options:]
+          callbacks[type] << Callback[target, options].tap do |callback|
+            next unless callbacks[type].map(&:hash).to_set === callback.hash
 
-          raise(ArgumentError, "Callback already defined") if callbacks[type].map(&:hash).to_set === new_callback.hash
-
-          callbacks[type] << new_callback
+            raise(ArgumentError, "Callback already defined")
+          end
         end
 
         def run_callbacks(context, &block)
-          run_with(before, context:)
-          yield_result = yield
-          run_with(after, context:)
-          yield_result
-        end
+          callbacks[:before].each { |it| it.run(context) }
 
-        private def run_with(ccs, context:)
-          ccs.each { |c| c.run(context) }
+          yield_result = yield
+
+          callbacks[:after].each { |it| it.run(context) }
+
+          yield_result
         end
       end
 
@@ -61,12 +62,12 @@ module ActiveFunctionCore
         # Defines `before_[name]` and `after_[name]` methods for setting callbacks.
         #
         # @param method [Symbol] the name of the callbackable method.
-        # @param name [Symbol] custom name of callbacks before_[name] & after_[name] methods.
+        # @param name [Symbol] alias for hooked method before_[name] & after_[name] methods.
         def define_hooks_for(method, name: method)
           raise(ArgumentError, "Hook for #{method} are already defined") if hooks.key?(method)
           raise(ArgumentError, "Method #{method} is not defined") unless method_defined?(method)
 
-          hooks[name] = Hook[method_name: name]
+          hooks[name] = Hook.new(name)
 
           define_singleton_method(:"before_#{name}") do |target, options = {}|
             set_callback(:before, name, target, options)
@@ -91,7 +92,7 @@ module ActiveFunctionCore
         # @param options [Hash] the options for the callback.
         # @options options [Symbol] :if the name of the method to check before executing the callback.
         def set_callback(type, method_name, target, options = {})
-          raise(ArgumentError, "Hook for :#{method} is not defined") unless hooks.key?(method_name)
+          raise(ArgumentError, "Hook for :#{method_name} is not defined") unless hooks.key?(method_name)
           raise(ArgumentError, "Options #{unknown} are not defined") if (unknown = (options.keys - callback_options.keys)) && unknown.any?
 
           hooks[method_name].add_callback(type:, target:, options: _normalized_options(options))
@@ -100,7 +101,10 @@ module ActiveFunctionCore
         # Sets a custom callback option.
         #
         # @param name [Symbol] the name of the option.
-        # @param block [Proc] the block to call with the option value and the context.
+        # @yield [*attrs, context:] the block to call.
+        # @yieldparam attrs [*] the attributes passed to the option.
+        # @yieldparam context [Object] the instance context (optional).
+        # @yieldreturn [Boolean].
         def set_callback_options(name, &block)
           callback_options[name] = block
         end
