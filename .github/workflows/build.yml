@@ -1,5 +1,4 @@
-name: Build
-
+name: "CI ruby v2.6-3.2"
 on:
   push:
     branches:
@@ -9,10 +8,12 @@ on:
 
 jobs:
   test:
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     env:
       BUNDLE_JOBS: 4
       BUNDLE_RETRY: 3
+      CI: true
     strategy:
       fail-fast: false
       matrix:
