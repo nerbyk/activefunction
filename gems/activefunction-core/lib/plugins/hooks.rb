@@ -19,7 +19,7 @@ module ActiveFunctionCore
         }.freeze
         SUPPORTED_CALLBACKS      = %i[before after].freeze
 
-        Callback = Data.define(:target, :options) do
+        Callback = Data.define(:options, :target) do
           def run(context)
             raise ArgumentError, "Callback target #{target} is not defined" unless context.respond_to?(target, true)
             raise ArgumentError, ":callback_options is not defined in #{context.class}" unless context.class.respond_to?(:callback_options)
@@ -42,7 +42,7 @@ module ActiveFunctionCore
         end
 
         def add_callback(type:, target:, options: {})
-          callbacks[type] << Callback[target, options].tap do |callback|
+          callbacks[type] << Callback[options, target].tap do |callback|
             next unless callbacks[type].map(&:hash).to_set === callback.hash
 
             raise(ArgumentError, "Callback already defined")

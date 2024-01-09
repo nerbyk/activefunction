@@ -25,7 +25,7 @@ describe ActiveFunctionCore::Plugins::Hooks::Hook do
     it "should add callback" do
       subject.add_callback(type: :before, target: :set_pupa_salary)
 
-      _(subject.callbacks[:before]).must_equal [described_class::Callback[:set_pupa_salary, {}]]
+      _(subject.callbacks[:before]).must_equal [described_class::Callback[{}, :set_pupa_salary]]
     end
 
     it "should raise ArgumentError when callback already defined" do

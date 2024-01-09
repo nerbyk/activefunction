@@ -19,7 +19,7 @@ describe ActiveFunctionCore::Plugins::Hooks::Hook::Callback do
     end
   end
 
-  subject { ActiveFunctionCore::Plugins::Hooks::Hook::Callback.new(target, options) }
+  subject { ActiveFunctionCore::Plugins::Hooks::Hook::Callback.new(options, target) }
 
   let(:target) { :target_method }
   let(:options) { [] }
