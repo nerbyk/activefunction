@@ -2,6 +2,13 @@
 
 require "forwardable"
 
+# TODO: remove with new ruby-next release
+if RUBY_VERSION < "3.2"
+  Data.define_singleton_method(:inherited) do |subclass|
+    subclass.instance_variable_set(:@members, members)
+  end
+end
+
 module ActiveFunctionCore
   module Plugins
     module Hooks
@@ -22,8 +29,8 @@ module ActiveFunctionCore
           end
         end
 
-        def initialize(name, callbacks: SUPPORTED_CALLBACKS.dup)
-          super(callbacks: callbacks.to_h { [_1, []] }, method_name: name)
+        def initialize(callbacks: SUPPORTED_CALLBACKS.dup, **)
+          super(callbacks: callbacks.to_h { [_1, []] }, **)
         end
 
         def add_callback(type:, target:, options: {})
