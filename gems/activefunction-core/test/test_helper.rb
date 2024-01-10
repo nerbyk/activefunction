@@ -8,4 +8,6 @@ require "minitest/reporters"
 
 require "active_function_core"
 
+RubyNext::Language.setup_gem_load_path("test", transpile: true)
+
 Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new(color: true)]

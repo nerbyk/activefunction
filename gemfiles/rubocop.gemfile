@@ -4,5 +4,5 @@ source "https://rubygems.org" do
   gem "rubocop-rake"
   gem "rubocop-shopify"
   gem "standard", "~> 1.12.1"
-  gem "ruby-next", ">= 0.15.3"
+  gem "ruby-next", ">= 1.0.0"
 end
