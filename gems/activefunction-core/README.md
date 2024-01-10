@@ -1,143 +1,112 @@
-# ActiveFunction
+# ActiveFunction Core
 
-rails/action_controller like gem which provides lightweight callbacks, strong parameters & rendering features. It's designed to be used with AWS Lambda functions, but can be also used with any Ruby application. 
+Inspired by the structure of the AWS SDK gem, `activefunction-core` seamlessly integrates with the `activefunction` library family, offering a unified interface. It's also designed to operate as a standalone solution.
 
-Implemented with some of ruby 3.x features, but also supports ruby 2.6.x thanks to [RubyNext](https://github.com/ruby-next/ruby-next) transpiler. Type safety achieved by RBS and [Steep](https://github.com/soutaro/steep).
+## Features
+
+- **Ruby-Next Integration:** Enables ruby-next auto-transpiling mode. This allows to use latest Ruby syntax while maintaining compatibility with older versions.
+- **Plugins:** Extends functionality via plugin capabilities, including a callbacks DSL for `before_action` and `after_action` implementation within classes.
 
 
-## A Short Example
+## Plugins
 
-Here's a simple example of a function that uses ActiveFunction:
+### Hooks
+
+Provides ActiveSupport::Callbacks like DSL for hooks through `::define_hooks_for` to define `before_[method_name]` & `after_[method_name]` callbacks and redefined #method_name to execute callbacks around it. 
+
+### Usage
 
 ```ruby
-require 'active_function'
+class YourClass
+  include ActiveFunction::Core::Plugins::Hooks
 
-class AppFunction < ActiveFunction::Base
-  def index 
-    render json: SomeTable.all
-  end 
+  define_hooks_for :your_method
+
+  before_your_method :do_something_before
+  after_your_method :do_something_after
+
+  def your_method
+    # Method implementation here...
+  end
+
+  private
+
+  def do_something_before
+    # Callback logic to execute before your_method
+  end
+
+  def do_something_after
+    # Callback logic to execute after your_method
+  end
 end
-```
+``` 
 
-Use `#process` method to proceed the request:
+### Hook Method Alias
 
-```ruby 
-AppFunction.process(:index) # processes index action of AppFunction instance
-```
-Also check extended [example](https://github.com/DanilMaximov/activefunction/tree/master/active_function_example)
-## Callbacks 
-ActiveFunction supports simple callbacks `:before` and `:after` which runs around provided action in `#process`. 
+If you need to alias the method name, you can do so by passing the `:name` option.
 
 ```ruby
-class AppFunction < ActiveFunction::Base
-  before_action :set_user 
-  after_action :log_response
-  
-  # some action ...
+define_hooks_for :your_method, name: :your_method_alias
+before_your_method_alias :do_something_before
+```
 
-  private 
+### Options
 
-  def set_user 
-    @user = User.first
-  end 
+Supports options for `before_[method_name]` & `after_[method_name]` callbacks. Each option is a Proc that return a Bool. By default, `:if` & `:unless` options are vailable, accepting method name.
 
-  def log_response 
-    Logger.info @response 
+```ruby
+
+class YourClass
+  include ActiveFunction::Core::Plugins::Hooks
+
+  define_hooks_for :your_method
+
+  before_your_method :do_something_before, if: :condition_met?
+  after_your_method :do_something_after, unless: :condition_met?
+
+  def your_method
+    # Method implementation here...
+  end
+
+  private
+
+  def condition_met?
+    # Condition logic here...
+  end
+
+  def do_something_before
+    # Callback logic to execute before your_method
+  end
+
+  def do_something_after
+    # Callback logic to execute after your_method
   end
 end
 ```
 
-Callbacks also can be user  with `only: Array[Symbol]` and `if: Symbol` options.
+Using `::set_callback_options` method, you can define your own options. This method accepts a single attribute Hash where the key is the option name and the value is a Proc that returns a Bool. Specify `context:` keyword argument for proc to access current class instance.
 
 ```ruby
-class AppFunction < ActiveFunction::Base
-  before_action :set_user, only: %i[show update destroy], if: :request_valid?
-  
-  # some actions ...
-  
-  private def request_valid? = true
+class YourClass
+  include ActiveFunction::Core::Plugins::Hooks
+
+  set_callback_options only: ->(only_methods, context:) { only_methods.include?(context.action) }
+
+  define_hooks_for :your_method
+
+  before_your_method :do_something_before, only: %[foo bar]
+
+  def action = "foo"
 end
 ```
 
-Callbacks are inheritable so all callbacks calls will be inherited from base class
-```ruby
-class BaseFunction < ActiveFunction::Base
-  before_action :set_current_user
+### Callbacks Inheritance
 
-  def set_current_user
-    @current_user = User.first
-  end 
-end
-
-class PostsFunction < BaseFunction
-  def index
-    render json: @current_user
-  end
-end
-```
-## Strong Parameters
-ActiveFunction supports strong parameters which can be accessed by `#params` instance method. Strong parameters hash can be passed in `#process` as second argument.
-
-```ruby
-PostFunction.process(:index, data: { id: 1, name: "Pupa" })
-```
-
-Simple usage:
-```ruby
-class PostsFunction < ActiveFunction::Base
-  def index 
-    render json: permitted_params
-  end 
-
-  def permitted_params = params
-    .require(:data)
-    .permit(:id, :name)
-    .to_h
-end 
-```
-Strong params supports nested attributes
-```ruby 
-params.permit(:id, :name, :address => [:city, :street])
-```
-
-## Rendering
-ActiveFunction supports rendering of JSON. Rendering is obligatory for any function naction and can be done by `#render` method.
-```ruby
-class PostsFunction < ActiveFunction::Base
-  def index 
-    render json: { id: 1, name: "Pupa" }
-  end 
-end
-```
-default status code is 200, but it can be changed by `:status` option
-```ruby
-class PostsFunction < ActiveFunction::Base
-  def index 
-    render json: { id: 1, name: "Pupa" }, status: 201
-  end 
-end
-```
-Headers can be passed by `:headers` option. Default headers are `{"Content-Type" => "application/json"}`.
-```ruby
-class PostsFunction < ActiveFunction::Base
-  def index 
-    render json: { id: 1, name: "Pupa" }, headers: { "X-Request-Id" => "123" }
-  end 
-end
-```
-
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'activefunction', git: "https://github.com/DanilMaximov/activefunction.git"
-```
+Callbacks are inheritable so all callbacks calls will be inherited from base class.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/rake test` to run the tests and `bin/rake steep` to run type checker. 
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/rake test:all` to run the tests and `bin/rake steep` to run type checker. 
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
