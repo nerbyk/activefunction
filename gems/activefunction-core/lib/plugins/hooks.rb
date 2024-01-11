@@ -31,7 +31,7 @@ module ActiveFunctionCore
 
           private def normalized_options(options, context)
             options.map do |option|
-              name, arg = option.first
+              name, arg = option
               -> { context.class.callback_options[name].call(arg, context:) }
             end
           end
@@ -108,7 +108,7 @@ module ActiveFunctionCore
         # @options options [Symbol] :if the name of the method to check before executing the callback.
         def set_callback(type, method_name, target, options = {})
           raise(ArgumentError, "Hook for :#{method_name} is not defined") unless hooks.key?(method_name)
-          raise(ArgumentError, "Hook Callback accepts only #{options.keys} options") if (options.keys - callback_options.keys).any?
+          raise(ArgumentError, "Hook Callback accepts only #{callback_options.keys} options") if (options.keys - callback_options.keys).any?
 
           hooks[method_name].add_callback(type:, target:, options:)
         end

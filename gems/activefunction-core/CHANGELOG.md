@@ -11,3 +11,6 @@
 - Added Plugins support
 - Added Hooks plugin - refactored ActiveFunction::Functions::Callbacks implementation.
 
+## [0.2.1]
+
+- Fixed Plugins options handling
