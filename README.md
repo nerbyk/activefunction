@@ -1,10 +1,17 @@
 # ActiveFunction
 
-rails/action_controller like gem which provides lightweight callbacks, strong parameters & rendering features. It's designed to be used with AWS Lambda functions, but can be also used with any Ruby application. 
+Collection of gems designed to be used with FaaS (Function as a Service) computing instances. Inspired by aws-sdk v3 gem structure & rails/activesupport.
 
-Implemented with some of ruby 3.x features, but also supports ruby 2.6.x thanks to [RubyNext](https://github.com/ruby-next/ruby-next) transpiler. Type safety achieved by RBS and [Steep](https://github.com/soutaro/steep).
+Implemented with most of ruby 3.2+ features, but also supports ruby >= 2.6 thanks to [RubyNext](https://github.com/ruby-next/ruby-next) transpiler. 
+
+Type safety achieved by RBS and [Steep](https://github.com/soutaro/steep) (Disabled due to number of Ruby::UnsupportedSyntax errors)
 
 
+# Gems 
+
+- [activefunction](/) - Main gem, provides rails/action-controller like API
+- [activefunction-core](/gems/activefunction-core/README.md) - Provides RubyNext integration and Plugins module
+- activefunction-orm - WIP
 
 ## A Short Example
 
@@ -27,7 +34,8 @@ AppFunction.process(:index) # processes index action of AppFunction instance
 ```
 Also check extended [example](https://github.com/DanilMaximov/activefunction/tree/master/active_function_example)
 ## Callbacks 
-ActiveFunction supports simple callbacks `:before` and `:after` which runs around provided action in `#process`. 
+
+ActiveFunction supports simple callbacks engined by [ActiveFunctionCore::Plugins::Hooks](https://github.com/DanilMaximov/activefunction/tree/master/gems/activefunction-core#hooks) plugin and provides `:before_action` and `:after_action` which runs around provided action in `#process`.  
 
 ```ruby
 class AppFunction < ActiveFunction::Base
@@ -48,7 +56,11 @@ class AppFunction < ActiveFunction::Base
 end
 ```
 
-Callbacks also can be user  with `only: Array[Symbol]` and `if: Symbol` options.
+### Callbacks options
+
+Supports default [ActiveFunctionCore::Plugins::Hooks::Hook::Callback options](https://github.com/DanilMaximov/activefunction/tree/master/gems/activefunction-core#options) `:if => Symbol` & `:unless => Symbol` options.
+
+Support custom defined in ActiveFunction::Function::Callbacks `only: Array[Symbol]` option.
 
 ```ruby
 class AppFunction < ActiveFunction::Base
@@ -59,23 +71,8 @@ class AppFunction < ActiveFunction::Base
   private def request_valid? = true
 end
 ```
+More details in [ActiveFunctionCore::Plugins::Hooks readme](https://github.com/DanilMaximov/activefunction/tree/master/gems/activefunction-core#hooks)
 
-Callbacks are inheritable so all callbacks calls will be inherited from base class
-```ruby
-class BaseFunction < ActiveFunction::Base
-  before_action :set_current_user
-
-  def set_current_user
-    @current_user = User.first
-  end 
-end
-
-class PostsFunction < BaseFunction
-  def index
-    render json: @current_user
-  end
-end
-```
 ## Strong Parameters
 ActiveFunction supports strong parameters which can be accessed by `#params` instance method. Strong parameters hash can be passed in `#process` as second argument.
 
@@ -133,7 +130,7 @@ end
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'activefunction', git: "https://github.com/DanilMaximov/activefunction.git"
+gem 'activefunction'
 ```
 
 ## Development

@@ -9,13 +9,13 @@ Gem::Specification.new do |spec|
   spec.email   = ["danil.maximov2000@gmail.com"]
 
   spec.summary = %(
-    rails/action_controller like gem which provides
-    callbacks, strong parameters & rendering features.
+    Collection of gems designed to be used with FaaS (Function as a Service) computing instances. 
+    Inspired by aws-sdk v3 gem structure & rails/activesupport.
   )
   spec.description = %(
-    rails/action_controller like gem which provides lightweight callbacks,
-    strong parameters & rendering features. It's designed to be used with
-    AWS Lambda functions, but can be also used with any Ruby application.
+    Collection of gems designed to be used with FaaS (Function as a Service) computing instances.  
+    Provides lightweight callbacks, strong parameters & rendering features. 
+    It's designed to be used with AWS Lambda functions, but can be also used with any Ruby application.
 
     Implemented with some of ruby 3.x features, but also supports
     ruby 2.6.x thanks to RubyNext transpiler. Type safety achieved
