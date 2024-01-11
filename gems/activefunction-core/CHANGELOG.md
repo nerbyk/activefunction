@@ -11,6 +11,11 @@
 - Added Plugins support
 - Added Hooks plugin - refactored ActiveFunction::Functions::Callbacks implementation.
 
-## [0.2.1]
+## [0.2.1] - Yanked due to invalid .rbnext files 
 
 - Fixed Plugins options handling
+
+## [0.2.2]
+
+- Republish 0.2.1
+
