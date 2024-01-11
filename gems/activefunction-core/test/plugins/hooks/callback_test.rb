@@ -15,6 +15,7 @@ describe ActiveFunctionCore::Plugins::Hooks::Hook::Callback do
       end
 
       def executable?
+        true
       end
     end
   end
@@ -22,7 +23,7 @@ describe ActiveFunctionCore::Plugins::Hooks::Hook::Callback do
   subject { ActiveFunctionCore::Plugins::Hooks::Hook::Callback.new(options, target) }
 
   let(:target) { :target_method }
-  let(:options) { [] }
+  let(:options) { {} }
   let(:context) { klass.new }
 
   describe "#run" do
@@ -33,7 +34,7 @@ describe ActiveFunctionCore::Plugins::Hooks::Hook::Callback do
     end
 
     it "should execute target method with options" do
-      options << {if: :executable?}
+      options[:if] = :executable?
 
       context.expects(:executable?).once
 
@@ -41,7 +42,7 @@ describe ActiveFunctionCore::Plugins::Hooks::Hook::Callback do
     end
 
     it "should not execute target method when some of option != true" do
-      options << {if: :undefined_method} # returns nil
+      options[:if] = :undefined_method # returns nil
 
       context.expects(target).never
 
@@ -58,6 +59,14 @@ describe ActiveFunctionCore::Plugins::Hooks::Hook::Callback do
       assert_raises(ArgumentError) do
         subject.run(Object.new)
       end
+    end
+  end
+
+  describe "#normalized_options" do
+    it "should wrap options with proc" do
+      options[:if] = :executable?
+
+      _(subject.send(:normalized_options, options, context).first.call).must_equal true
     end
   end
 end
