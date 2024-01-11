@@ -26,7 +26,7 @@ class CallbackTestFunction
 end
 
 class CallbackTestFunction1 < CallbackTestFunction
-  set_callback :before, :first
+  set_callback :before, :action, :first
 end
 
 class CallbackTest1 < Minitest::Test

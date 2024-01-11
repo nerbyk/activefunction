@@ -39,11 +39,9 @@ module ActiveFunction
         @response.to_h
       end
 
-      private
-
       def process(action) ;  public_send(action); end
 
-      def performed? ;  @response.committed?; end
+      private def performed? ;  @response.committed?; end
     end
   end
 end
