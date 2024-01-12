@@ -2,9 +2,11 @@
 
 require "forwardable"
 
-module ActiveFunction
+class ActiveFunction
   module Functions
     module StrongParameters
+      ActiveFunction.register_plugin :strong_parameters, self
+
       Error = Class.new(StandardError)
 
       class Parameters < Data.define(:params, :permitted)
@@ -76,7 +78,7 @@ module ActiveFunction
           @attributes.to_h.hash
         end
 
-        def with(params:, permitted:)
+        def with(params:, permitted: false)
           self.class.new(params, permitted)
         end
 
@@ -84,9 +86,9 @@ module ActiveFunction
 
         def nested_attribute(attribute)
           if attribute.is_a? Hash
-            with(params: attribute, permitted: permitted)
+            with(params: attribute)
           elsif attribute.is_a?(Array) && attribute[0].is_a?(Hash)
-            attribute.map { |it| with(params: it, permitted: permitted) }
+            attribute.map { |it| with(params: it) }
           else
             attribute
           end

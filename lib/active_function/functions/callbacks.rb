@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
-module ActiveFunction
+class ActiveFunction
   module Functions
     module Callbacks
+      ActiveFunction.register_plugin :callbacks, self
+
       def self.included(base)
         base.include ActiveFunctionCore::Plugins::Hooks
         base.define_hooks_for :process, name: :action

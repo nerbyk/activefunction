@@ -2,9 +2,11 @@
 
 require "json"
 
-module ActiveFunction
+class ActiveFunction
   module Functions
     module Rendering
+      ActiveFunction.register_plugin :rendering, self
+
       Error = Class.new(StandardError)
 
       class DoubleRenderError < Error

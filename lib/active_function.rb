@@ -6,19 +6,25 @@ require "active_function/base"
 
 RubyNext::Language.setup_gem_load_path(transpile: true)
 
-module ActiveFunction
-  REQUIRED_FUNCTIONS_PLUGINS = %i[callbacks strong_parameters rendering response].freeze
+class ActiveFunction
+  def self.inherited(subclass)
+    subclass.instance_variable_set(:@_plugins, plugins.dup)
+  end
 
-  REQUIRED_FUNCTIONS_PLUGINS.each do |plugin|
-    require "active_function/functions/#{plugin}"
+  def self.plugins = @_plugins ||= {}
+
+  def self.register_plugin(symbol, mod)
+    plugins[symbol] = mod
   end
 
   def self.plugin(mod)
-    mod.include Functions::Callbacks
-    mod.include Functions::StrongParameters
-    mod.include Functions::Rendering
-    mod.const_set(:Response, Class.new(Functions::Response))
+    if mod.is_a? Symbol
+      require "active_function/functions/#{mod}"
+      mod = plugins.fetch(mod)
+    end
+
+    self::Base.include(mod)
   end
 
-  plugin(ActiveFunction::Base)
+  plugin :response
 end

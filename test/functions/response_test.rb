@@ -4,7 +4,7 @@ require "test_helper"
 
 class ResponseTest < Minitest::Test
   def setup
-    @response = ActiveFunction::Functions::Response.new
+    @response = ActiveFunction::Functions::Response::Response.new
   end
 
   def test_status
