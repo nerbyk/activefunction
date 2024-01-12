@@ -3,52 +3,50 @@
 require "forwardable"
 
 module ActiveFunction
-  class ParameterMissingError < Error
-    MESSAGE_TEMPLATE = "Missing parameter: %s"
-
-    attr_reader :message
-
-    def initialize(param)
-      MESSAGE_TEMPLATE % param
-    end
-  end
-
-  class UnpermittedParameterError < Error
-    MESSAGE_TEMPLATE = "Unpermitted parameter: %s"
-
-    attr_reader :message
-
-    def initialize(param)
-      MESSAGE_TEMPLATE % param
-    end
-  end
-
   module Functions
     module StrongParameters
-      def params
-        @_params ||= Parameters.new(@request)
-      end
+      Error = Class.new(StandardError)
 
-      class Parameters
-        extend Forwardable
-        def_delegators :@parameters, :each, :map
-        include Enumerable
+      class Parameters < Data.define(:params, :permitted)
+        class ParameterMissingError < Error
+          MESSAGE_TEMPLATE = "Missing parameter: %s"
 
-        def initialize(parameters, permitted: false)
-          @parameters = parameters
-          @permitted  = permitted
+          attr_reader :message
+
+          def initialize(param)
+            MESSAGE_TEMPLATE % param
+          end
         end
 
+        class UnpermittedParameterError < Error
+          MESSAGE_TEMPLATE = "Unpermitted parameter: %s"
+
+          attr_reader :message
+
+          def initialize(param)
+            MESSAGE_TEMPLATE % param
+          end
+        end
+
+        protected :params
+
+        extend Forwardable
+        include Enumerable
+
+        def_delegators :params, :each, :map
+
+        def initialize(permitted: false, **) = super
+
         def [](attribute)
-          nested_attribute(parameters[attribute])
+          nested_attribute(params[attribute])
         end
 
         def require(attribute)
-          value = self[attribute]
-
-          raise ParameterMissingError, attribute if value.nil?
-
-          value
+          if (value = self[attribute])
+            value
+          else
+            raise ParameterMissingError, attribute
+          end
         end
 
         def permit(*attributes)
@@ -60,28 +58,28 @@ module ActiveFunction
                 pparams[k] = process_nested(self[k], :permit, v)
               end
             else
-              next unless parameters.key?(attribute)
+              next unless params.key?(attribute)
 
               pparams[attribute] = self[attribute]
             end
           end
 
-          Parameters.new(pparams, permitted: true)
+          with(params: pparams, permitted: true)
         end
 
         def to_h
-          raise UnpermittedParameterError, parameters.keys unless @permitted
+          raise UnpermittedParameterError, params.keys unless permitted
 
-          parameters.transform_values { process_nested(_1, :to_h) }
+          params.transform_values { process_nested(_1, :to_h) }
         end
 
         private
 
         def nested_attribute(attribute)
           if attribute.is_a? Hash
-            Parameters.new(attribute)
+            with(params: attribute)
           elsif attribute.is_a?(Array) && attribute[0].is_a?(Hash)
-            attribute.map { Parameters.new(_1) }
+            attribute.map { |it| with(params: it) }
           else
             attribute
           end
@@ -96,8 +94,10 @@ module ActiveFunction
             attribute
           end
         end
+      end
 
-        attr_reader :parameters
+      def params
+        @_params ||= Parameters[@request || {}]
       end
     end
   end

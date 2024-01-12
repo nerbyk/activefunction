@@ -2,29 +2,22 @@
 
 module ActiveFunction
   module Functions
-    class Response
-      attr_accessor :status, :headers, :body
-
-      def initialize(status: 200, headers: {}, body: nil)
-        @status     = status
-        @headers    = headers
-        @body       = body
-        @committed  = false
-      end
+    class Response < Struct.new(:status, :headers, :body, :committed)
+      def initialize(status: 200, headers: {}, body: nil, committed: false) = super(status, headers, body, committed)
 
       def to_h
         {
           statusCode: status,
-          headers:    headers,
-          body:       body
+          headers:,
+          body:
         }
       end
 
       def commit!
-        @committed = true
+        self.committed = true
       end
 
-      def committed? = @committed
+      alias_method :committed?, :committed
     end
   end
 end

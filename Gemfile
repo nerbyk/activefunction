@@ -18,6 +18,7 @@ end
 
 group :test do
   gem 'mocha'
+  gem 'pry-byebug'
   gem "minitest", "~> 5.15.0"
   gem "minitest-reporters", "~> 1.4.3"
 end 

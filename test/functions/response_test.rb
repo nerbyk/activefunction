@@ -10,19 +10,19 @@ class ResponseTest < Minitest::Test
   def test_status
     @response.status = 201
 
-    assert_equal @response.status, 201
+    assert_equal 201, @response.status
   end
 
   def test_headers
     @response.headers = {"X-Test" => "test"}
 
-    assert_equal @response.headers, {"X-Test" => "test"}
+    assert_equal({"X-Test" => "test"}, @response.headers)
   end
 
   def test_body
     @response.body = "test"
 
-    assert_equal @response.body, "test"
+    assert_equal "test", @response.body
   end
 
   def test_to_h
@@ -30,14 +30,14 @@ class ResponseTest < Minitest::Test
     @response.headers = {"X-Test" => "test"}
     @response.body    = "test"
 
-    assert_equal @response.to_h, {statusCode: 201, headers: {"X-Test" => "test"}, body: "test"}
+    assert_equal({statusCode: 201, headers: {"X-Test" => "test"}, body: "test"}, @response.to_h)
   end
 
   def test_commit!
-    assert_equal @response.committed?, false
+    assert_equal false, @response.committed?
 
     @response.commit!
 
-    assert_equal @response.committed?, true
+    assert_equal true, @response.committed?
   end
 end
