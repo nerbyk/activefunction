@@ -12,9 +12,9 @@ describe ActiveFunction::Functions::StrongParameters do
 
   describe "#params" do
     let(:described_class) { ActiveFunction::Functions::StrongParameters::Parameters }
-    subject { instance.params }
-
     let(:instance) { klass.new }
+
+    subject { instance.params }
 
     before do
       instance.instance_variable_set(:@request, params)
@@ -45,7 +45,7 @@ describe ActiveFunction::Functions::StrongParameters do
         end
 
         it "should return Parameters instance with valid attributes" do
-          _(subject[:user].hash).must_equal(described_class.new({name: "Pupa"}).hash)
+          _(subject[:user].hash).must_equal(described_class.new({name: "Pupa"}, false).hash)
         end
       end
 
@@ -93,7 +93,7 @@ describe ActiveFunction::Functions::StrongParameters do
         end
 
         it "returns Parameters instance with valid attributes" do
-          _(subject.require(:user).hash).must_equal(described_class.new({name: "Pupa"}).hash)
+          _(subject.require(:user).hash).must_equal(described_class.new({name: "Pupa"}, false).hash)
         end
       end
 
@@ -105,6 +105,7 @@ describe ActiveFunction::Functions::StrongParameters do
         end
       end
     end
+
     describe "#permit" do
       describe "when there are permitted parameters" do
         let(:params) { {id: 1, name: "Pupa"} }

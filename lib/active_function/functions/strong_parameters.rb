@@ -35,8 +35,6 @@ module ActiveFunction
 
         def_delegators :params, :each, :map
 
-        def initialize(permitted: false, **) = super
-
         def [](attribute)
           nested_attribute(params[attribute])
         end
@@ -67,19 +65,28 @@ module ActiveFunction
           with(params: pparams, permitted: true)
         end
 
+        # Redefines RubyNext::Core::Data instance methods
         def to_h
           raise UnpermittedParameterError, params.keys unless permitted
 
           params.transform_values { process_nested(_1, :to_h) }
         end
 
+        def hash
+          @attributes.to_h.hash
+        end
+
+        def with(params:, permitted:)
+          self.class.new(params, permitted)
+        end
+
         private
 
         def nested_attribute(attribute)
           if attribute.is_a? Hash
-            with(params: attribute)
+            with(params: attribute, permitted: permitted)
           elsif attribute.is_a?(Array) && attribute[0].is_a?(Hash)
-            attribute.map { |it| with(params: it) }
+            attribute.map { |it| with(params: it, permitted: permitted) }
           else
             attribute
           end
@@ -97,7 +104,7 @@ module ActiveFunction
       end
 
       def params
-        @_params ||= Parameters[@request || {}]
+        @_params ||= Parameters.new(@request, false)
       end
     end
   end
