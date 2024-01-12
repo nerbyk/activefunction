@@ -4,6 +4,7 @@
 
 require "test_helper"
 require "mocha/minitest"
+# rubocop:disable Lint/ConstantDefinitionInBlock
 
 fork do
   require "active_function"
@@ -219,3 +220,5 @@ fork do
     end
   end
 end
+
+# rubocop:enable Lint/ConstantDefinitionInBlock
