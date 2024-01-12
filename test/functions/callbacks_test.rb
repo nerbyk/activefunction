@@ -1,171 +1,76 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "mocha/minitest"
 
-class CallbackTestFunction
-  include ActiveFunction::Functions::Core
+require "active_function"
+require "active_function/functions/callbacks"
+
+class CallbackTestFunction < Class.new {
+  def process
+  end
+}
   include ActiveFunction::Functions::Callbacks
 
   def index
     nil
   end
 
-  def show
-    nil
-  end
-
   private # callback methods
 
   def first
-    @first = "Biba"
-  end
-
-  def second
-    @second = "Boba"
+    nil
   end
 end
 
-class CallbackTestFunction1 < CallbackTestFunction
-  set_callback :before, :first
-end
+describe ActiveFunction::Functions::Callbacks do
+  let(:klass) { Class.new(CallbackTestFunction) }
 
-class CallbackTest1 < Minitest::Test
-  def setup
-    @function = CallbackTestFunction1.new
+  subject { klass.new }
+
+  it "should execute callback around process" do
+    klass.set_callback :before, :action, :first
+
+    subject.expects(:first).once
+
+    subject.process
   end
 
-  def test_callback
-    @function.dispatch(:index, {}, committed_response)
+  it "should execute before callback" do
+    klass.before_action :first
 
-    assert_equal @function.instance_variable_get(:@first), "Biba"
-  end
-end
+    subject.expects(:first).once
 
-class CallbackTestFunction2 < CallbackTestFunction
-  before_action :first
-  after_action :second
-end
-
-class CallbackTestFunction2Inherit < CallbackTestFunction2
-end
-
-class CallbackTest2 < Minitest::Test
-  def setup
-    @function = CallbackTestFunction2.new
+    subject.process
   end
 
-  def test_before_action_callback
-    @function.dispatch(:index, {}, committed_response)
+  it "should execute after callback" do
+    klass.after_action :first
 
-    assert_equal @function.instance_variable_get(:@first), "Biba"
+    subject.expects(:first).once
+
+    subject.process
   end
 
-  def test_after_action_callback
-    @function.dispatch(:index, {}, committed_response)
+  describe "when :only option is specified" do
+    before do
+      klass.set_callback :before, :action, :first, only: %i[index]
+    end
 
-    assert_equal @function.instance_variable_get(:@second), "Boba"
-  end
+    it "should execute callback" do
+      klass.define_method(:action_name) { :index }
 
-  def test_inherit_callbacks
-    @function = CallbackTestFunction2Inherit.new
+      subject.expects(:first).once
 
-    @function.dispatch(:index, {}, committed_response)
+      subject.process
+    end
 
-    assert_equal @function.instance_variable_get(:@first), "Biba"
-    assert_equal @function.instance_variable_get(:@second), "Boba"
-  end
-end
+    it "should NOT execute callback" do
+      klass.define_method(:action_name) { :show }
 
-class ConditionalCallbacksTestFunction1 < CallbackTestFunction
-  before_action :first, only: %i[index]
-  after_action :second, only: %i[show]
-end
+      subject.expects(:first).never
 
-class ConditionalCallbacksTest1 < Minitest::Test
-  def setup
-    @function = ConditionalCallbacksTestFunction1.new
-  end
-
-  def test_before_action_callback
-    @function.dispatch(:index, {}, committed_response)
-
-    assert_equal @function.instance_variable_get(:@first), "Biba"
-    assert_nil @function.instance_variable_get(:@second)
-  end
-
-  def test_after_action_callback
-    @function.dispatch(:show, {}, committed_response)
-
-    assert_equal @function.instance_variable_get(:@second), "Boba"
-  end
-end
-
-class ConditionalCallbacksTestFunction2 < CallbackTestFunction
-  before_action :first, only: %i[show index]
-end
-
-class ConditionalCallbacksTest2 < Minitest::Test
-  def setup
-    @function = ConditionalCallbacksTestFunction2.new
-  end
-
-  def test_callback_for_index_action
-    @function.dispatch(:index, {}, committed_response)
-
-    assert_equal @function.instance_variable_get(:@first), "Biba"
-  end
-
-  def test_callback_for_show_action
-    @function.dispatch(:show, {}, committed_response)
-
-    assert_equal @function.instance_variable_get(:@first), "Biba"
-  end
-end
-
-class ConditionalCallbacksTestFunction3 < CallbackTestFunction
-  before_action :first, if: :executable?
-  after_action :second, if: :not_executable?
-
-  private
-
-  def executable?
-    false
-  end
-
-  def not_executable?
-    true
-  end
-end
-
-class ConditionalCallbacksTest3 < Minitest::Test
-  def setup
-    @function = ConditionalCallbacksTestFunction3.new
-  end
-
-  def test_if_before_action_callback
-    @function.dispatch(:index, {}, committed_response)
-
-    assert_nil @function.instance_variable_get(:@first)
-    assert_equal @function.instance_variable_get(:@second), "Boba"
-  end
-end
-
-class ConditionalCallbacksTestFunction4 < CallbackTestFunction
-  before_action :first, only: %i[index], if: :executable?
-
-  private def executable?
-    true
-  end
-end
-
-class ConditionalCallbacksTest4 < Minitest::Test
-  def setup
-    @function = ConditionalCallbacksTestFunction4.new
-  end
-
-  def test_callback_with_all_condition_options
-    @function.dispatch(:index, {}, committed_response)
-
-    assert_equal @function.instance_variable_get(:@first), "Biba"
+      subject.process
+    end
   end
 end

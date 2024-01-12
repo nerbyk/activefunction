@@ -1,90 +1,75 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "mocha/minitest"
 
-class RenderingTestFunction
-  include ActiveFunction::Functions::Core
-  include ActiveFunction::Functions::Rendering
+require "active_function/functions/rendering"
 
-  def index
-    render
+describe ActiveFunction::Functions::Rendering do
+  let(:described_class) { ActiveFunction::Functions::Rendering }
+  let(:klass) do
+    Class.new { include ActiveFunction::Functions::Rendering }
   end
-end
+  let(:response_mock) { Struct.new(:status, :headers, :body) }
 
-class RenderingTest < Minitest::Test
-  def setup
-    @function = RenderingTestFunction.new
-  end
+  subject { klass.new }
 
-  def test_render_default_response
-    @function.dispatch(:index, {}, response)
+  it { _(subject).must_respond_to :render }
 
-    response = @function.instance_variable_get(:@response)
+  describe "#render" do
+    let(:instance) { klass.new }
+    let(:performed) { false }
+    let(:res) { response_mock.new }
 
-    assert_equal response.status, 200
-    assert_equal response.headers, {"Content-Type" => "application/json"}
-    assert_equal response.body, "{}"
-  end
-end
+    subject { instance.instance_variable_get(:@response) }
 
-class DoubleRenderTestFunction < RenderingTestFunction
-  def index
-    super
-    render
-  end
-end
-
-class DoubleRenderTest < Minitest::Test
-  def setup
-    @function = DoubleRenderTestFunction.new
-  end
-
-  def test_double_render
-    assert_raises ActiveFunction::DoubleRenderError do
-      @function.dispatch(:index, {}, response)
+    before do
+      instance.instance_variable_set(:@response, res)
+      instance.expects(:performed?).returns(performed)
     end
-  end
-end
 
-class RenderCustomResponseTestFunction < RenderingTestFunction
-  def index
-    render json: {a: 1, b: 2}, head: {"X-Test" => "test"}, status: 201
-  end
-end
+    describe "when response is not committed" do
+      before do
+        res.expects(:commit!).once
+      end
 
-class RenderCustomResponseTest < Minitest::Test
-  def setup
-    @function = RenderCustomResponseTestFunction.new
-  end
+      it "should change response status" do
+        instance.render status: 201
 
-  def test_render_custom_response
-    @function.dispatch(:index, {}, response)
+        _(subject.status).must_equal 201
+      end
 
-    response = @function.instance_variable_get(:@response)
+      it "should change response headers" do
+        instance.render head: {"X-Test" => "test"}
 
-    assert_equal response.status, 201
-    assert_equal response.headers, {"Content-Type" => "application/json", "X-Test" => "test"}
-    assert_equal response.body, '{"a":1,"b":2}'
-  end
-end
+        _(subject.headers).must_equal({"X-Test" => "test", "Content-Type" => "application/json"})
+      end
 
-class NotRenderedTestFunction
-  include ActiveFunction::Functions::Core
-  include ActiveFunction::Functions::Rendering
+      it "should change response body" do
+        instance.render json: "test"
 
-  def index
-    nil
-  end
-end
+        _(subject.body).must_equal "test".to_json
+      end
 
-class NotRenderedTest < Minitest::Test
-  def setup
-    @function = NotRenderedTestFunction.new
-  end
+      it "should change response status, headers and body" do
+        instance.render status: 412, head: {"X-Test" => "test"}, json: {a: 1, b: 2}
 
-  def test_not_rendered
-    assert_raises ActiveFunction::NotRenderedError do
-      @function.dispatch(:index, {}, response)
+        _(subject.to_h).must_equal({status: 412, headers: {"X-Test" => "test", "Content-Type" => "application/json"}, body: {a: 1, b: 2}.to_json})
+      end
+    end
+
+    describe "when response is already committed" do
+      let(:performed) { true }
+
+      before do
+        res.expects(:commit!).never
+      end
+
+      it "should raise double render error" do
+        assert_raises(described_class::DoubleRenderError) do
+          instance.render
+        end
+      end
     end
   end
 end

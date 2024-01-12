@@ -1,20 +1,38 @@
 # frozen_string_literal: true
 
 module ActiveFunction
-  class Base
-    require "active_function/functions/core"
-    require "active_function/functions/callbacks"
-    require "active_function/functions/strong_parameters"
-    require "active_function/functions/rendering"
-    require "active_function/functions/response"
+  class SuperBase
+    attr_reader :action_name, :request, :response
 
-    include Functions::Core
-    include Functions::Callbacks
-    include Functions::Rendering
-    include Functions::StrongParameters
+    def initialize(action_name, request, response)
+      @action_name = action_name
+      @request     = request
+      @response    = response
+    end
 
-    def self.process(action_name, request = {}, response = Functions::Response.new)
-      new.dispatch(action_name, request, response)
+    def dispatch
+      process(action_name)
+
+      @response.commit! unless performed?
+
+      @response.to_h
+    end
+
+    def process(action) = public_send(action)
+
+    private def performed? = @response.committed?
+  end
+
+  class Base < SuperBase
+    Error = Class.new(StandardError)
+
+    # @param [String, Symbol] action_name - name of method to call
+    # @param [Hash] request - request params, accessible through `#params` method
+    # @param [Response] response - response object
+    def self.process(action_name, request = {}, response = Response.new)
+      raise ArgumentError, "Action method #{action_name} is not defined" unless method_defined?(action_name)
+
+      new(action_name, request, response).dispatch
     end
   end
 end

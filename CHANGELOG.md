@@ -46,4 +46,9 @@
 
 - Start gem restructuring for modularizaition
 - Introduce `activefunction-core` gem with RubyNext integration
- 
+
+# [0.4.0] - 2024-01-11
+
+- Replace `ActiveFunction::Functions::Callbacks` with `ActiveFunctionCore::Plugins::Hooks`
+- Remove `RubyNext` integration, use `ActiveFunctionCore::RubyNext` instead
+
