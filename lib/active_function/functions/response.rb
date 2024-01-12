@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ActiveFunction
+module ActiveFunction
   module Functions
     module Response
       ActiveFunction.register_plugin :response, self

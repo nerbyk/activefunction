@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ActiveFunction
+module ActiveFunction
   class SuperBase
     attr_reader :action_name, :request, :response
 

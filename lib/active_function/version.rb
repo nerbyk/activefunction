@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-class ActiveFunction
+module ActiveFunction
   VERSION = "0.4.0"
 end

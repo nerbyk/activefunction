@@ -3,6 +3,8 @@
 require "test_helper"
 require "mocha/minitest"
 
+require "active_function/functions/rendering"
+
 describe ActiveFunction::Functions::Rendering do
   let(:described_class) { ActiveFunction::Functions::Rendering }
   let(:klass) do

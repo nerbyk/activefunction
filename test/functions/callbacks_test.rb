@@ -3,6 +3,9 @@
 require "test_helper"
 require "mocha/minitest"
 
+require "active_function"
+require "active_function/functions/callbacks"
+
 class CallbackTestFunction < Class.new {
   def process
   end

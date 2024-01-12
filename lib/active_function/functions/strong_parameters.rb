@@ -2,7 +2,7 @@
 
 require "forwardable"
 
-class ActiveFunction
+module ActiveFunction
   module Functions
     module StrongParameters
       ActiveFunction.register_plugin :strong_parameters, self
@@ -31,11 +31,6 @@ class ActiveFunction
         end
 
         protected :params
-
-        extend Forwardable
-        include Enumerable
-
-        def_delegators :params, :each, :map
 
         def [](attribute)
           nested_attribute(params[attribute])

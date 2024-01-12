@@ -2,6 +2,8 @@
 
 require "test_helper"
 
+require "active_function/functions/strong_parameters"
+
 describe ActiveFunction::Functions::StrongParameters do
   let(:klass) { Class.new { include ActiveFunction::Functions::StrongParameters } }
   let(:params) { {} }

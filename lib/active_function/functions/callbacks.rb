@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ActiveFunction
+module ActiveFunction
   module Functions
     module Callbacks
       ActiveFunction.register_plugin :callbacks, self

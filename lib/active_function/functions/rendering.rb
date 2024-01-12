@@ -2,7 +2,7 @@
 
 require "json"
 
-class ActiveFunction
+module ActiveFunction
   module Functions
     module Rendering
       ActiveFunction.register_plugin :rendering, self
