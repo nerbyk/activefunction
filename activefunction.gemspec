@@ -9,17 +9,16 @@ Gem::Specification.new do |spec|
   spec.email   = ["danil.maximov2000@gmail.com"]
 
   spec.summary = %(
-    Collection of gems designed to be used with FaaS (Function as a Service) computing instances. 
-    Inspired by aws-sdk v3 gem structure & rails/activesupport.
+    Playground gem for Ruby 3.2+ features and more, designed for FaaS computing instances, but mostly used for experiments.
   )
   spec.description = %(
-    Collection of gems designed to be used with FaaS (Function as a Service) computing instances.  
-    Provides lightweight callbacks, strong parameters & rendering features. 
-    It's designed to be used with AWS Lambda functions, but can be also used with any Ruby application.
+    ActiveFunction is a collection of gems designed to be used with Function as a Service (FaaS) computing instances. Inspired by aws-sdk v3 gem structure and rails/activesupport.
 
-    Implemented with some of ruby 3.x features, but also supports
-    ruby 2.6.x thanks to RubyNext transpiler. Type safety achieved
-    by RBS and Steep.
+    Features:
+    - Ruby Version Compatibility: Implemented with most of Ruby 3.2+ features, with support for Ruby versions >= 2.6 through the RubyNext transpiler (CI'ed).
+    - Type Safety: Achieves type safety through the use of RBS and Steep (CI'ed) [Note: disabled due to the presence of Ruby::UnsupportedSyntax errors].
+    - Plugins System: Provides a simple Plugin system inspired by Polishing Ruby Programming by Jeremy Evans to load gem plugins and self-defined plugins.
+    - Gem Collection: Offers a collection of gems designed for use within ActiveFunction or as standalone components.
   )
   spec.homepage = "https://github.com/DanilMaximov/acitvefunction"
   spec.license = "MIT"
