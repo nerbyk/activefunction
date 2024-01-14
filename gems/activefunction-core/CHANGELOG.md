@@ -19,3 +19,6 @@
 
 - Republish 0.2.1
 
+## [0.2.3]
+
+- YARD Doc Added
