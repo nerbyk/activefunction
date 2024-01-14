@@ -57,7 +57,7 @@ Supports options for `before_[method_name]` & `after_[method_name]` callbacks. E
 ```ruby
 
 class YourClass
-  include ActiveFunction::Core::Plugins::Hooks
+  include ActiveFunctionCore::Plugins::Hooks
 
   define_hooks_for :your_method
 

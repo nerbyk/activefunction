@@ -2,6 +2,7 @@
 
 require "test_helper"
 require "mocha/minitest"
+require "active_function_core/plugins/hooks"
 
 describe ActiveFunctionCore::Plugins::Hooks::Hook do
   subject { described_class.new(:hook) }

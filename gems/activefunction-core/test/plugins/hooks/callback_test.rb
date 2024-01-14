@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
+require "active_function_core/plugins/hooks"
 
 describe ActiveFunctionCore::Plugins::Hooks::Hook::Callback do
   let(:klass) do
