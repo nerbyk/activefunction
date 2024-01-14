@@ -3,8 +3,9 @@
 require "json"
 
 module ActiveFunction
+  module Functions
     # Allows manipulations with {ActiveFunction::SuperBase#response} via {render} instance method.
-    # 
+    #
     # @example
     #   require "active_function"
     #
@@ -42,7 +43,7 @@ module ActiveFunction
       # @param json [Hash] JSON data to be rendered (default is an empty hash).
       # @param head [Hash] Additional headers to be included in the response (default is an empty hash).
       #
-      # @raise [DoubleRenderError] Raised if #render is called multiple times in the same action. 
+      # @raise [DoubleRenderError] Raised if #render is called multiple times in the same action.
       def render(status: 200, json: {}, head: {})
         raise DoubleRenderError, @action_name if performed?
 
