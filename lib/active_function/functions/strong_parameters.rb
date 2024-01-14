@@ -4,11 +4,31 @@ require "forwardable"
 
 module ActiveFunction
   module Functions
+    # Allows manipulations with {ActiveFunction::SuperBase#request} via {params} instance method and {Parameters} object.
+    #
+    # @example
+    #   require "active_function"
+    #
+    #   ActiveFunction.config do
+    #     plugin :strong_parameters
+    #   end
+    #
+    #   class PostsFunction < ActiveFunction::Base
+    #     def index
+    #       @response.body = permitted_params
+    #     end
+    #
+    #     def permitted_params
+    #       params.require(:data).permit(:id, :name).to_h
+    #     end
+    #   end
+    #
+    #   PostsFunction.process(:index, data: { id: 1, name: "Pupa" })
     module StrongParameters
       ActiveFunction.register_plugin :strong_parameters, self
 
       Error = Class.new(StandardError)
-
+      # The Parameters class encapsulates the parameter handling logic.
       class Parameters < Data.define(:params, :permitted)
         class ParameterMissingError < Error
           MESSAGE_TEMPLATE = "Missing parameter: %s"
@@ -32,10 +52,19 @@ module ActiveFunction
 
         protected :params
 
+        # Allows access to parameters by key.
+        #
+        # @param attribute [Symbol] The key of the parameter.
+        # @return [Parameters, Object] The value of the parameter.
         def [](attribute)
           nested_attribute(params[attribute])
         end
 
+        # Requires the presence of a specific parameter.
+        #
+        # @param attribute [Symbol] The key of the required parameter.
+        # @return [Parameters, Object] The value of the required parameter.
+        # @raise [ParameterMissingError] if the required parameter is missing.
         def require(attribute)
           if (value = self[attribute])
             value
@@ -44,6 +73,10 @@ module ActiveFunction
           end
         end
 
+        # Specifies the allowed parameters.
+        #
+        # @param attributes [Array<Symbol, Hash<Symbol, Array<Symbol>>>] The attributes to permit.
+        # @return [Parameters] A new instance with permitted parameters.
         def permit(*attributes)
           pparams = {}
 
@@ -62,7 +95,10 @@ module ActiveFunction
           with(params: pparams, permitted: true)
         end
 
-        # Redefines RubyNext::Core::Data instance methods
+        # Converts parameters to a hash.
+        #
+        # @return [Hash] The hash representation of the parameters.
+        # @raise [UnpermittedParameterError] if any parameters are unpermitted.
         def to_h
           raise UnpermittedParameterError, params.keys unless permitted
 
@@ -100,6 +136,9 @@ module ActiveFunction
         end
       end
 
+      # Return params object with {ActiveFunction::SuperBase#request}.
+      #
+      # @return [Parameters] instance of {Parameters} class.
       def params
         @_params ||= Parameters.new(@request, false)
       end

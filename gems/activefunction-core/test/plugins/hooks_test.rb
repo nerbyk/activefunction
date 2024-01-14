@@ -3,6 +3,8 @@
 require "test_helper"
 require "mocha/minitest"
 
+require "active_function_core/plugins/hooks"
+
 describe ActiveFunctionCore::Plugins::Hooks do
   let(:klass) do
     Class.new do

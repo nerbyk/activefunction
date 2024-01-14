@@ -1,8 +1,10 @@
 # ActiveFunction
+[![Build](https://github.com/DanilMaximov/activefunction/actions/workflows/build.yml/badge.svg)](DanilMaximov/activefunction/actions)
+[![Gem Version](https://badge.fury.io/rb/activefunction.svg)](https://badge.fury.io/rb/activefunction)
+[![RubyDoc](https://img.shields.io/badge/RubyDoc-Documentation-blue.svg)](https://rubydoc.info/gems/activefunction)
 
-Playground gem for Ruby 3.2+ features and more.
 
-Collection of gems designed to be used with FaaS (Function as a Service) computing instances. Inspired by aws-sdk v3 gem structure & rails/activesupport.
+Playground gem for Ruby 3.2+ features initially designed to be used with FaaS (Function as a Service) computing instances. Inspired by aws-sdk v3 gem structure & rails/activesupport.
 
 ## Features
 
@@ -10,7 +12,7 @@ Collection of gems designed to be used with FaaS (Function as a Service) computi
 - **Type Safety:** Achieves type safety through the use of RBS and [Steep](https://github.com/soutaro/steep). (CI'ed)
   - Note: disabled due to the presence of Ruby::UnsupportedSyntax errors.
 - **Plugins System:** Provides a simple Plugin system (inspired by [Polishing Ruby Programming by Jeremy Evans](https://github.com/PacktPublishing/Polished-Ruby-Programming)) to load gem plugins as well as self-defined plugins.
-- **Gem Collection** Provides a collection of gems designed to be used within ActiveFunction or standalone.
+- **Gem Collection:** Provides a collection of gems designed to be used within ActiveFunction or standalone.
 
 # Gems
 
@@ -20,7 +22,7 @@ Collection of gems designed to be used with FaaS (Function as a Service) computi
 
 ## Quick Start
 
-Here's a simple example of a function that uses ActiveFunction:
+Here's a simple example of a function that uses ActiveFunction(w/o plugins):
 
 ```ruby
 require "active_function"
@@ -31,9 +33,7 @@ class AppFunction < ActiveFunction::Base
 
     return if performed?
 
-    @response.status  = 200
-    @response.headers = {"Content-Type" => "application/json"}
-    @response.body    = @request[:data]
+    @response.body = @request[:data]
   end
 
   private def response_with_error
@@ -42,15 +42,24 @@ class AppFunction < ActiveFunction::Base
   end
 end
 
-AppFunction.process(:index, {data: {id: 1}}) # => { :statusCode=>200, :headers=> {"Content-Type"=>"application/json"}, :body=>{id: 1}"}
 ```
+
+The `#process` method is used to run the function.
+
+```ruby
+AppFunction.process(:index, {data: {id: 1}}) # => { 
+#   :statusCode => 200, 
+#   :headers => { }, 
+#   :body => {id: 1}"
+# }
+``` 
 
 ## Plugins
 
 ActiveFunction supports plugins which can be loaded by `ActiveFunction.config` method. Currently, there are 3 plugins available:
-  - [:callbacks](#callbacks) - provides `:before_action` and `:after_action` callbacks with `:if`, `:unless` & `:only` options.
-  - [:strong_parameters](#strong-parameters) - provides strong parameters support via `#params` instance method.
-  - [:rendering](#rendering) - provides rendering support via `#render` instance method.
+  - [:callbacks](#callbacks) - provides `:before_action`, `:after_action` & `:set_callback` DSL with `:if`, `:unless` & `:only` options.
+  - [:strong_parameters](#strong-parameters) - provides strong parameters support via `#params` instance method around `@request` object.
+  - [:rendering](#rendering) - provides rendering support via `#render` instance method around `@response` object.
 
 ## Configuration
 
@@ -78,15 +87,15 @@ class AppFunction < ActiveFunction::Base
 
   private def parse_user_data = @user_data = params.require(:data).permit(:id, :name).to_h
 end
+
+AppFunction.process(:index, {data: { id: 1, name: 2}}) # => { 
+#   :statusCode => 200, 
+#   :headers => {"Content-Type"=>"application/json"}, 
+#   :body=>"{\"id\":1,\"name\":2}"
+# }
 ```
 
-Use `#process` method to proceed the request:
-
-```ruby
-# handler.rb
-AppFunction.process(:index, {data: { id: 1, name: 2}}) # => { :statusCode=>200, :headers=> {"Content-Type"=>"application/json"}, :body=>"{\"id\":1,\"name\":2}"}
-```
-
+[See Plugins Docs](https://rubydoc.info/gems/activefunction/ActiveFunction#plugin-class_method) for more details.
 
 ## Callbacks
 
@@ -129,7 +138,38 @@ class AppFunction < ActiveFunction::Base
   private def request_valid? = true
 end
 ```
-More details in [ActiveFunctionCore::Plugins::Hooks readme](https://github.com/DanilMaximov/activefunction/tree/master/gems/activefunction-core#hooks)
+
+### Defining Custom Callbacks
+
+External Plugin `ActiveFunctionCore::Plugins::Hooks` provides `:define_hooks_for` & `:set_callback_options` DSL to define custom callbacks & options.
+
+```ruby
+class MessagingApp < ActiveFunction::Base
+  set_callback_options retries: ->(times, context:) { context.retry if context.retries < times }
+  define_hooks_for :retry
+
+  after_action :retry, if: :failed?, only: %i[send_message], retries: 3
+  after_retry :increment_retries
+
+  def send_message
+    @response.status = 200 if SomeApi.send(@request[:message_content]).success?
+  end
+
+  def retry
+    @response.committed = false
+ 
+    process
+  end
+
+  private def increment_retries = @response.body[:tries] += 1
+  private def failed? = @response.status != 200
+  private def retries = @response.body[:tries] ||= 0
+end
+
+MessagingApp.process(:send_message, { sender_name: "Alice", message_content: "How are you?" })
+```
+
+[See Callbacks Doc](https://rubydoc.info/gems/activefunction/ActiveFunction/Functions/Callbacks) for more details.
 
 ## Strong Parameters
 
@@ -170,6 +210,8 @@ Strong params supports nested attributes
 params.permit(:id, :name, :address => [:city, :street])
 ```
 
+[See StrongParameters Doc](https://rubydoc.info/gems/activefunction/ActiveFunction/Functions/StrongParameters) for more details.
+
 ## Rendering
 
 ActiveFunction supports rendering of JSON. The #render method is used for rendering responses. It accepts the following options:
@@ -197,6 +239,8 @@ end
 PostFunction.process(:index) # => { :statusCode=>200, :headers=> {"Content-Type"=>"application/json", "Some-Header" => "Some-Value"}, :body=>"{\"id\":1,\"name\":\"Pupa\"}"}
 ```
 
+[See Rendering Doc](https://rubydoc.info/gems/activefunction/ActiveFunction/Functions/Rendering) for more details.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -207,9 +251,9 @@ gem "activefunction"
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/rake test` to run the tests and `bin/rake steep` to run type checker.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/rake test:all` to run the tests and `bin/rake steep` to run type checker.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`.
 
 ## Contributing
 

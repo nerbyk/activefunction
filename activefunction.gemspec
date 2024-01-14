@@ -28,11 +28,17 @@ Gem::Specification.new do |spec|
     "changelog_uri"   => "https://github.com/DanilMaximov/activefunction/CHANGELOG.md"
   }
 
-  spec.files = Dir.glob("lib/**/*") + Dir.glob("lib/.rbnext/**/*") + Dir.glob("bin/**/*") + %w[sig/active_function.rbs sig/manifest.yml] + %w[README.md LICENSE.txt CHANGELOG.md]
-
+  spec.files = Dir.glob("lib/**/*") + Dir.glob("lib/.rbnext/**/*") + 
+    %w[sig/active_function.rbs sig/manifest.yml] + 
+    %w[README.md LICENSE.txt CHANGELOG.md]
   spec.require_paths = ["lib"]
-
   spec.required_ruby_version = ">= 2.6"
 
   spec.add_dependency "activefunction-core", "~> 0.2.2"
+  
+  spec.add_development_dependency "rake", "~> 13.0"
+  spec.add_development_dependency "ruby-next", ">= 1.0.0"
+  spec.add_development_dependency "minitest", "~> 5.15.0"
+  spec.add_development_dependency "minitest-reporters", "~> 1.4.3"
+  spec.add_development_dependency "mocha", "~> 2.1.0"
 end

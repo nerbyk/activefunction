@@ -53,3 +53,6 @@
 - Introduce Plugin system
 - Global refactoring
 
+# [0.4.1] - 2024-01-14
+
+- YARD Doc Added
