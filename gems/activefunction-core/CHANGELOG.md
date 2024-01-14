@@ -22,3 +22,6 @@
 ## [0.2.3]
 
 - YARD Doc Added
+
+## [0.2.4]
+- Fix Plugins

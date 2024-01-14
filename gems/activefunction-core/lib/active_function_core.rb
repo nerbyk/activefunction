@@ -8,4 +8,5 @@ module ActiveFunctionCore
   Error = Class.new(StandardError)
 
   require "active_function_core/version"
+  require "active_function_core/plugins/hooks"
 end
