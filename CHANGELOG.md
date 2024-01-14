@@ -56,3 +56,7 @@
 # [0.4.1] - 2024-01-14
 
 - YARD Doc Added
+
+# [0.4.2] - 2024-01-14
+
+- Bump ActiveFunctionCore to 0.2.4
