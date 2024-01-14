@@ -1,7 +1,7 @@
 # ActiveFunction
 [![Build](https://github.com/DanilMaximov/activefunction/actions/workflows/build.yml/badge.svg)](DanilMaximov/activefunction/actions)
 [![Gem Version](https://badge.fury.io/rb/activefunction.svg)](https://badge.fury.io/rb/activefunction)
-[![RubyDoc](https://img.shields.io/badge/RubyDoc-Documentation-blue.svg)](https://rubydoc.info/gems/activefunction)
+[![RubyDoc](https://img.shields.io/badge/RubyDoc-Documentation-blue.svg)](https://rubydoc.info/gems/activefunction/0.4.1)
 
 
 Playground gem for Ruby 3.2+ features initially designed to be used with FaaS (Function as a Service) computing instances. Inspired by aws-sdk v3 gem structure & rails/activesupport.
