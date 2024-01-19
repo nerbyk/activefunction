@@ -45,3 +45,6 @@ Layout/HashAlignment:
 
 Layout/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: true
+
+Lint/ConstantDefinitionInBlock:
+  Enabled: false
