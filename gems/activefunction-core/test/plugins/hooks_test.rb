@@ -67,6 +67,8 @@ describe ActiveFunctionCore::Plugins::Hooks do
     it "should raise ArgumentError for undefined method" do
       assert_raises ArgumentError do
         subject.define_hooks_for :missing_method
+
+        subject.new.missing_method
       end
     end
 
