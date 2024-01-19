@@ -147,7 +147,6 @@ module ActiveFunctionCore
         # @raise [ArgumentError] if method is not defined.
         def define_hooks_for(method, name: method)
           raise(ArgumentError, "Hook for #{method} are already defined") if hooks.key?(method)
-          raise(ArgumentError, "Method #{method} is not defined") unless method_defined?(method)
 
           hooks[name] = Hook.new(name)
 
@@ -159,11 +158,17 @@ module ActiveFunctionCore
             set_callback(:after, name, target, options)
           end
 
-          define_method(method) do |*args, &block|
-            self.class.hooks[name].run_callbacks(self) do
-              super(*args, &block)
+          redefiner = Module.new do
+            define_method(method) do |*args, &block|
+              raise(ArgumentError, "Hook Method #{method} is not defined") unless defined?(super)
+
+              self.class.hooks[name].run_callbacks(self) do
+                super(*args, &block)
+              end
             end
           end
+
+          prepend redefiner
         end
 
         # Sets a callback for an existing hook'ed method.
