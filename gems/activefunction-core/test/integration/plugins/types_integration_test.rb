@@ -6,14 +6,16 @@ require "active_function_core/plugins/types"
 class TestType
   include ActiveFunctionCore::Plugins::Types
 
-  define_schema(NamedType) do
+  define_schema do
     type NamedType => {
       string_attribute:  String,
       integer_attribute: Integer,
       boolean_attribute: Boolean,
       array_attribute:   Array[String],
       hash_attribute:    Hash[Symbol, String],
-      nested_type:       NestedType
+      nested_type:       NestedType,
+      array_nested_type: Array[NestedType],
+      hash_nested_type:  Hash[Symbol, NestedType]
     }
 
     type NestedType => {
@@ -36,7 +38,9 @@ describe TestType do
       boolean_attribute: boolean_attribute,
       array_attribute:   array_attribute,
       hash_attribute:    hash_attribute,
-      nested_type:       nested_type_attributes
+      nested_type:       nested_type_attributes,
+      array_nested_type: [nested_type_attributes],
+      hash_nested_type:  {symbol: nested_type_attributes}
     }
   end
 
@@ -71,8 +75,12 @@ describe TestType do
     assert_equal boolean_attribute, subject.boolean_attribute
     assert_equal array_attribute, subject.array_attribute
     assert_equal hash_attribute, subject.hash_attribute
+    assert_equal [nested_type_attributes], subject.array_nested_type
+    assert_equal({symbol: nested_type_attributes}, subject.hash_nested_type)
+
     assert_equal nested_string_attribute, subject.nested_type.nested_string_attribute
     assert_equal nested_integer_attribute, subject.nested_type.nested_integer_attribute
+
     assert_equal nested_nested_attribute, subject.nested_type.nested_nested_type.nested_nested_attribute
   end
 

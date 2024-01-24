@@ -8,27 +8,35 @@ module ActiveFunctionCore
 
       LetiralTypeValidation = proc { |value, type| value.is_a?(type) }
       BooleanTypeValidation = proc { |value| LetiralTypeValidation[value, TrueClass] || LetiralTypeValidation[value, FalseClass] }
-      ArrayTypeValidation   = proc { |value, type| LetiralTypeValidation[value, Array] && value.all? { |v| LetiralTypeValidation[v, type[0]] } }
+      ArrayTypeValidation   = proc { |value, type| LetiralTypeValidation[value, Array] && value.all? { |v| Validator[type[0]].call(v, type[0]) } }
       SubTypeValidation     = proc { |value, type| LetiralTypeValidation[value, Hash] && (type < RawType || type < Type) }
+
       HashTypeValidation    = proc do |value, type|
-        k_type, v_type = type.first
-        LetiralTypeValidation[value, Hash] && value.all? { |k, v| k.is_a?(k_type) && v.is_a?(v_type) }
+        k_type, v_type           = type.first
+        k_validator, v_validator = [Validator[k_type], Validator[v_type]]
+        LetiralTypeValidation[value, Hash] && value.all? { |k, v| k_validator[k, k_type] && v_validator[v, v_type] }
       end
 
+      Validator = proc do |type|
+        type_klass = type.is_a?(Class) ? type : type.class
+
+        VALIDATORS[type_klass] || VALIDATORS[:sub_type]
+      end
+
+      VALIDATORS = {
+        String    => LetiralTypeValidation,
+        Integer   => LetiralTypeValidation,
+        Float     => LetiralTypeValidation,
+        Symbol    => LetiralTypeValidation,
+        Boolean   => BooleanTypeValidation,
+        Array     => ArrayTypeValidation,
+        Hash      => HashTypeValidation,
+        :sub_type => SubTypeValidation
+      }
+
+      TypeError = Class.new(::TypeError)
+
       class Type < Data
-        VALIDATORS = {
-          String    => LetiralTypeValidation,
-          Integer   => LetiralTypeValidation,
-          Float     => LetiralTypeValidation,
-          Symbol    => LetiralTypeValidation,
-          Boolean   => BooleanTypeValidation,
-          Array     => ArrayTypeValidation,
-          Hash      => HashTypeValidation,
-          :sub_type => SubTypeValidation
-        }
-
-        TypeError = Class.new(::TypeError)
-
         def self.define(**attributes, &block)
           super(*attributes.keys, &block).tap do |klass|
             klass.define_singleton_method(:schema) { attributes.freeze }
@@ -36,60 +44,60 @@ module ActiveFunctionCore
         end
 
         def initialize(**attributes)
-          attributes.each { |it| validate_type!(it) }
-
-          subtype_attrs = attributes
-            .filter { |name, _| schema[name].is_a?(Class) && subtype_klass(name) < Type }
-            .each_with_object({}) { |(name, value), h| h[name] = subtype_klass(name).new(**value) }
-
-          super(**attributes.merge(subtype_attrs))
+          super(**attributes.then(&method(:prepare_attributes!)))
         end
 
         def schema = self.class.schema
 
         private
 
-        def subtype_klass(name)
-          return schema[name] unless schema[name].is_a?(Class) && schema[name] < RawType
+        def prepare_attributes!(attributes)
+          attributes.each_with_object({}) do |(name, value), h|
+            raise ArgumentError, "unknown attribute #{name}" unless (type = schema[name])
+            raise(TypeError, "expected #{value} to be a #{type}") unless Validator[type].call(value, type)
 
-          self.class.const_get(schema[name].name)
+            h[name] = transform_attribute(type, value)
+          end
         end
 
-        def validate_type!(type_definition)
-          name, value = type_definition
-          type        = schema[name].is_a?(Class) ? schema[name] : schema[name].class
-
-          validator = VALIDATORS[type] || VALIDATORS[:sub_type]
-
-          return if validator.call(value, schema[name])
-
-          raise TypeError, "expected #{name} to be a #{schema[name]}, got #{value.class}"
+        def transform_attribute(type, value)
+          if type.is_a?(Class) && type < RawType
+            self.class.const_get(type.name).new(**value)
+          else
+            value
+          end
         end
       end
 
       module ClassMethods
+        extend Forwardable
+        def_delegator ActiveFunctionCore.logger, :warn
+
         def const_missing(name)
           super unless @__root_type_klass.nil?
+
+          warn "Constant #{name} is missing. Defining Constant #{name} as a RawType" unless @__save_schema_definition
 
           const_set(name, Class.new(RawType))
         end
 
-        def define_schema(root = nil, &block)
+        def define_schema(&block)
+          @__save_schema_definition = true
+
           class_eval(&block)
 
-          if root.nil?
-            raise ArgumentError, "root type is not defined within a block" if @__root_type_klass.nil?
-          else
-            @__root_type_klass = const_get(root.name)
-          end
+          raise ArgumentError, "no types defined" unless @__types
+
+          @__types.freeze
+          @__root_type_klass        = @__types.first if @__root_type_klass.nil?
+          @__save_schema_definition = false
         end
 
         def type(hash)
+          @__types        ||= Set.new
           klass, attributes = hash.first
 
           if klass == :self
-            raise ArgumentError, "root type is already defined" if @__root_type_klass
-
             @__root_type_klass = Type.define(**attributes)
           else
             raise ArgumentError, "type Class must be a RawType" unless klass < RawType
@@ -97,7 +105,7 @@ module ActiveFunctionCore
             name = klass.name.split("::").last
             remove_const(name.to_sym)
 
-            const_set(name, Type.define(**attributes))
+            @__types << const_set(name, Type.define(**attributes))
           end
         end
 
@@ -108,7 +116,7 @@ module ActiveFunctionCore
         end
 
         def new(**attributes)
-          raise ArgumentError, "root type is not defined" unless @__root_type_klass
+          raise ArgumentError, "Root type is not defined." unless @__root_type_klass
 
           @__root_type_klass.new(**attributes)
         end
