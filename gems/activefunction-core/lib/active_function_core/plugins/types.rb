@@ -9,7 +9,7 @@ module ActiveFunctionCore
       LetiralTypeValidation = proc { |value, type| value.is_a?(type) }
       BooleanTypeValidation = proc { |value| LetiralTypeValidation[value, TrueClass] || LetiralTypeValidation[value, FalseClass] }
       ArrayTypeValidation   = proc { |value, type| LetiralTypeValidation[value, Array] && value.all? { |v| Validator[type[0]].call(v, type[0]) } }
-      SubTypeValidation     = proc { |value, type| LetiralTypeValidation[value, Hash] && (type < RawType || type < Type) }
+      SubTypeValidation     = proc { |value, type| type.is_a?(Class) && LetiralTypeValidation[value, Hash] && (type < RawType || type < Type) }
 
       HashTypeValidation    = proc do |value, type|
         k_type, v_type           = type.first
@@ -33,8 +33,6 @@ module ActiveFunctionCore
         Hash      => HashTypeValidation,
         :sub_type => SubTypeValidation
       }
-
-      TypeError = Class.new(::TypeError)
 
       class Type < Data
         def self.define(**attributes, &block)
@@ -61,7 +59,7 @@ module ActiveFunctionCore
         end
 
         def transform_attribute(type, value)
-          if type.is_a?(Class) && type < RawType
+          if SubTypeValidation[value, type]
             self.class.const_get(type.name).new(**value)
           else
             value
@@ -89,7 +87,7 @@ module ActiveFunctionCore
           raise ArgumentError, "no types defined" unless @__types
 
           @__types.freeze
-          @__root_type_klass        = @__types.first if @__root_type_klass.nil?
+          set_root_type(@__types.first) if @__root_type_klass.nil?
           @__save_schema_definition = false
         end
 
@@ -97,20 +95,16 @@ module ActiveFunctionCore
           @__types        ||= Set.new
           klass, attributes = hash.first
 
-          if klass == :self
-            @__root_type_klass = Type.define(**attributes)
-          else
-            raise ArgumentError, "type Class must be a RawType" unless klass < RawType
+          raise ArgumentError, "type Class must be a RawType" unless klass < RawType
 
-            name = klass.name.split("::").last
-            remove_const(name.to_sym)
+          name = klass.name.split("::").last
+          remove_const(name.to_sym)
 
-            @__types << const_set(name, Type.define(**attributes))
-          end
+          @__types << const_set(name, Type.define(**attributes))
         end
 
-        def root_type_klass(type)
-          raise(ArgumentError, "Unknown type class #{type}") unless defined?(type) || (type < RawType || type < Type)
+        def set_root_type(type)
+          raise(ArgumentError, "Unknown type class #{type}") unless @__types === type
 
           @__root_type_klass = type
         end

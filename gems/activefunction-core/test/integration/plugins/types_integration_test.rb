@@ -100,7 +100,7 @@ class TestType2
     string_attribute: String
   }
 
-  root_type_klass NamedType
+  set_root_type NamedType
 end
 
 describe TestType2 do
@@ -114,51 +114,17 @@ end
 class TestType3
   include ActiveFunctionCore::Plugins::Types
 
-  type self: {
-    string_attribute: String
-  }
-end
-
-describe TestType3 do
-  subject { TestType3.new(string_attribute: "string") }
-
-  it "should create typed object" do
-    assert_equal "string", subject.string_attribute
-  end
-end
-
-class TestType4
-  include ActiveFunctionCore::Plugins::Types
-
-  define_schema do
-    type self: {
-      string_attribute: String
-    }
-  end
-end
-
-describe TestType4 do
-  subject { TestType4.new(string_attribute: "string") }
-
-  it "should create typed object" do
-    assert_equal "string", subject.string_attribute
-  end
-end
-
-class TestType5
-  include ActiveFunctionCore::Plugins::Types
-
   define_schema do
     type NamedType => {
       string_attribute: String
     }
 
-    root_type_klass NamedType
+    set_root_type NamedType
   end
 end
 
-describe TestType5 do
-  subject { TestType5.new(string_attribute: "string") }
+describe TestType3 do
+  subject { TestType3.new(string_attribute: "string") }
 
   it "should create typed object" do
     assert_equal "string", subject.string_attribute
