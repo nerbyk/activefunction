@@ -8,22 +8,15 @@ module ActiveFunctionCore
 
       LetiralTypeValidation = proc { |value, type| value.is_a?(type) }
       BooleanTypeValidation = proc { |value| LetiralTypeValidation[value, TrueClass] || LetiralTypeValidation[value, FalseClass] }
-      ArrayTypeValidation   = proc { |value, type| LetiralTypeValidation[value, Array] && value.all? { |v| Validator[type[0]].call(v, type[0]) } }
+      ArrayTypeValidation   = proc { |value, type| LetiralTypeValidation[value, Array] && value.all? { |v| TypeValidator[type[0]].call(v, type[0]) } }
       SubTypeValidation     = proc { |value, type| type.is_a?(Class) && LetiralTypeValidation[value, Hash] && (type < RawType || type < Type) }
-
       HashTypeValidation    = proc do |value, type|
         k_type, v_type           = type.first
-        k_validator, v_validator = [Validator[k_type], Validator[v_type]]
+        k_validator, v_validator = [TypeValidator[k_type], TypeValidator[v_type]]
         LetiralTypeValidation[value, Hash] && value.all? { |k, v| k_validator[k, k_type] && v_validator[v, v_type] }
       end
 
-      Validator = proc do |type|
-        type_klass = type.is_a?(Class) ? type : type.class
-
-        VALIDATORS[type_klass] || VALIDATORS[:sub_type]
-      end
-
-      VALIDATORS = {
+      VALIDATORS_MAPPING = {
         String    => LetiralTypeValidation,
         Integer   => LetiralTypeValidation,
         Float     => LetiralTypeValidation,
@@ -33,6 +26,12 @@ module ActiveFunctionCore
         Hash      => HashTypeValidation,
         :sub_type => SubTypeValidation
       }
+
+      TypeValidator = proc do |type|
+        type_klass = type.is_a?(Class) ? type : type.class
+
+        VALIDATORS_MAPPING[type_klass] || VALIDATORS_MAPPING[:sub_type]
+      end
 
       class Type < Data
         def self.define(**attributes, &block)
@@ -52,14 +51,14 @@ module ActiveFunctionCore
         def prepare_attributes!(attributes)
           attributes.each_with_object({}) do |(name, value), h|
             raise ArgumentError, "unknown attribute #{name}" unless (type = schema[name])
-            raise(TypeError, "expected #{value} to be a #{type}") unless Validator[type].call(value, type)
+            raise(TypeError, "expected #{value} to be a #{type}") unless TypeValidator[type].call(value, type)
 
             h[name] = transform_attribute(type, value)
           end
         end
 
         def transform_attribute(type, value)
-          if SubTypeValidation[value, type]
+          if type.is_a?(Class) && (type < RawType || type < Type)
             self.class.const_get(type.name).new(**value)
           else
             value
