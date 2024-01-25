@@ -106,15 +106,15 @@ describe ActiveFunctionCore::Plugins::Types::Type do
       end
 
       describe "Hash type" do
-        let(:schema) { {hash: Hash[Symbol, String]} }
-        let(:attributes) { {hash: {symbol: "string"}} }
+        let(:schema) { {hash_attr: Hash[Symbol, String]} }
+        let(:attributes) { {hash_attr: {symbol: "string"}} }
 
         it "accepts Hash" do
-          _(subject.hash).must_equal(attributes[:hash])
+          _(subject.to_h).must_equal(attributes)
         end
 
         it "raises TypeError if provided attribute type doesn't match" do
-          attributes[:hash] = {symbol: 1}
+          attributes[:hash_attr] = {symbol: 1}
 
           assert_raises(TypeError) { subject }
         end

@@ -90,9 +90,9 @@ module ActiveFunctionCore
           @__save_schema_definition = false
         end
 
-        def type(hash)
+        def type(hash_attr)
           @__types        ||= Set.new
-          klass, attributes = hash.first
+          klass, attributes = hash_attr.first
 
           raise ArgumentError, "type Class must be a RawType" unless klass < RawType
 
