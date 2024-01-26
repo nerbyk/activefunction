@@ -4,12 +4,14 @@ require "test_helper"
 require "active_function_core/plugins/types"
 
 describe ActiveFunctionCore::Plugins::Types do
+  class TypesIncludedTestClass
+    include ActiveFunctionCore::Plugins::Types
+  end
+
   subject { klass }
 
+  let(:klass) { TypesIncludedTestClass }
   let(:described_class) { ActiveFunctionCore::Plugins::Types }
-  let(:klass) do
-    Class.new { include ActiveFunctionCore::Plugins::Types }
-  end
 
   describe "included" do
     it { _(subject).must_respond_to :define_schema }
@@ -18,9 +20,13 @@ describe ActiveFunctionCore::Plugins::Types do
   end
 
   describe "::type" do
-    before do
-      klass.type klass::NamedType => {string_attribute: String}
+    class TypeTestClass < TypesIncludedTestClass
+      type NamedType => {
+        string_attribute: String
+      }
     end
+
+    let(:klass) { TypeTestClass }
 
     it "defines Constant < Type" do
       _(subject.const_defined?(:NamedType)).must_equal true
@@ -28,7 +34,7 @@ describe ActiveFunctionCore::Plugins::Types do
     end
 
     it "adds type to types" do
-      _(subject.instance_variable_get(:@__types)).must_equal Set.new [subject::NamedType]
+      _(subject.instance_variable_get(:@__types)).must_be :===, subject::NamedType
     end
 
     it "redefines RawType to Type" do
@@ -49,10 +55,15 @@ describe ActiveFunctionCore::Plugins::Types do
   end
 
   describe "::set_root_type" do
-    before do
-      klass.type klass::NamedType => {string_attribute: String}
-      klass.set_root_type klass::NamedType
+    class TestSetRootTypeClass < TypesIncludedTestClass
+      type NamedType => {
+        string_attribute: String
+      }
+
+      set_root_type NamedType
     end
+
+    let(:klass) { TestSetRootTypeClass }
 
     it "sets root type" do
       _(subject.instance_variable_get(:@__root_type_klass)).must_equal subject::NamedType
@@ -66,13 +77,15 @@ describe ActiveFunctionCore::Plugins::Types do
   end
 
   describe "::define_schema" do
-    before do
-      klass.class_eval(&define_schema_proc)
+    class TestDefineSchemaClass < TypesIncludedTestClass
+      define_schema do
+        type NamedType => {
+          string_attribute: String
+        }
+      end
     end
 
-    let(:define_schema_proc) do
-      ->(k) { define_schema { type k::NamedType => {string_attribute: String} } }
-    end
+    let(:klass) { TestDefineSchemaClass }
 
     it "sets root type" do
       _(subject.instance_variable_get(:@__root_type_klass)).must_equal subject::NamedType
@@ -88,21 +101,32 @@ describe ActiveFunctionCore::Plugins::Types do
   end
 
   describe "::new" do
-    subject { klass.new(string_attribute: "string") }
+    class TestNewClassWithRootType < TypesIncludedTestClass
+      type NamedType => {
+        string_attribute: String
+      }
 
-    before do
-      klass.type klass::NamedType => {string_attribute: String}
-      klass.set_root_type klass::NamedType
+      set_root_type NamedType
     end
+
+    class TestNewClassWithoutRootType < TypesIncludedTestClass
+      type NamedType => {
+        string_attribute: String
+      }
+    end
+
+    subject do
+      klass.new(string_attribute: "string")
+    end
+
+    let(:klass) { TestNewClassWithRootType }
 
     it "creates instance of root type" do
       _(subject).must_be_instance_of klass::NamedType
     end
 
     it "raises ArgumentError if root type is not defined" do
-      klass.instance_variable_set(:@__root_type_klass, nil)
-
-      assert_raises(ArgumentError) { subject }
+      assert_raises(ArgumentError) { TestNewClassWithoutRootType.new(string_attribute: "string") }
     end
   end
 end

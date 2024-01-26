@@ -40,28 +40,26 @@ module ActiveFunctionCore
           end
         end
 
-        def initialize(**attributes)
-          super(**attributes.then(&method(:prepare_attributes!)))
+        def initialize(**)
+          super(build_attributes!(**))
         end
 
         def schema = self.class.schema
 
         private
 
-        def prepare_attributes!(attributes)
+        def build_attributes!(attributes)
+          attributes = attributes.values.first if RUBY_VERSION < "3.0" # RubyNext double-splat operator compatibility hack..
+
           attributes.each_with_object({}) do |(name, value), h|
             raise ArgumentError, "unknown attribute #{name}" unless (type = schema[name])
             raise(TypeError, "expected #{value} to be a #{type}") unless TypeValidator[type].call(value, type)
 
-            h[name] = transform_attribute(type, value)
-          end
-        end
-
-        def transform_attribute(type, value)
-          if type.is_a?(Class) && (type < RawType || type < Type)
-            self.class.const_get(type.name).new(**value)
-          else
-            value
+            h[name] = if type.is_a?(Class) && (type < RawType || type < Type)
+              self.class.const_get(type.name).new(**value)
+            else
+              value
+            end
           end
         end
       end
@@ -73,7 +71,7 @@ module ActiveFunctionCore
         def const_missing(name)
           super unless @__root_type_klass.nil?
 
-          warn "Constant #{name} is missing. Defining Constant #{name} as a RawType" unless @__save_schema_definition
+          warn "Constant #{name} is missing. Defining Constant #{name} as a RawType." unless @__save_schema_definition
 
           const_set(name, Class.new(RawType))
         end
