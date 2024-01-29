@@ -116,7 +116,7 @@ describe ActiveFunctionCore::Plugins::Types do
     end
 
     subject do
-      klass.new(string_attribute: "string")
+      klass.new({string_attribute: "string"})
     end
 
     let(:klass) { TestNewClassWithRootType }

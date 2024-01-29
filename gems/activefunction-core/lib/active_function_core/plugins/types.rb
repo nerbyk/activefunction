@@ -40,8 +40,8 @@ module ActiveFunctionCore
           end
         end
 
-        def initialize(**)
-          super(build_attributes!(**))
+        def initialize(attrs)
+          super(**build_attributes!(attrs))
         end
 
         def schema = self.class.schema
@@ -49,8 +49,6 @@ module ActiveFunctionCore
         private
 
         def build_attributes!(attributes)
-          attributes = attributes.values.first if RUBY_VERSION < "3.0" # RubyNext double-splat operator compatibility hack..
-
           attributes.each_with_object({}) do |(name, value), h|
             raise ArgumentError, "unknown attribute #{name}" unless (type = schema[name])
             raise(TypeError, "expected #{value} to be a #{type}") unless TypeValidator[type].call(value, type)
@@ -106,10 +104,10 @@ module ActiveFunctionCore
           @__root_type_klass = type
         end
 
-        def new(**attributes)
+        def new(hash_attrs)
           raise ArgumentError, "Root type is not defined." unless @__root_type_klass
 
-          @__root_type_klass.new(**attributes)
+          @__root_type_klass.new(**hash_attrs)
         end
       end
 

@@ -104,7 +104,7 @@ class TestType2
 end
 
 describe TestType2 do
-  subject { TestType2.new(string_attribute: "string") }
+  subject { TestType2.new({string_attribute: "string"}) }
 
   it "should create typed object" do
     assert_equal "string", subject.string_attribute
