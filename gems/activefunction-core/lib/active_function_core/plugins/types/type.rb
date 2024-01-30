@@ -7,18 +7,7 @@ module ActiveFunctionCore::Plugins::Types
 
   class Type < Data
     def self.define(type_validator:, **attributes, &block)
-      nillable_attributes = []
-      attributes.keys.each do |k|
-        next unless k.to_s.start_with?("?") || attributes[k].is_a?(Nullable)
-
-        if k.to_s.start_with?("?")
-          old_name      = k
-          k             = k.to_s.delete_prefix("?").to_sym
-          attributes[k] = Nullable[attributes.delete(old_name)]
-        end
-
-        nillable_attributes << k if attributes[k].is_a?(Nullable)
-      end
+      nillable_attributes = extract_nillable_attributes!(attributes)
 
       super(*attributes.keys, &block).tap do |klass|
         klass.define_singleton_method(:schema) { attributes.freeze }
@@ -27,17 +16,32 @@ module ActiveFunctionCore::Plugins::Types
       end
     end
 
+    private_class_method def self.extract_nillable_attributes!(attributes)
+      attributes.keys.filter_map do |key|
+        next false unless key.to_s.start_with?("?") || attributes[key].is_a?(Nullable)
+
+        if key.to_s.start_with?("?")
+          new_key             = key.to_s.delete_prefix("?").to_sym
+          attributes[new_key] = Nullable[attributes.delete(key)]
+
+          new_key
+        else
+          key
+        end
+      end
+    end
+
     def initialize(attributes)
       if (missing_nil_attributes = self.class.nillable_members - attributes.keys).any?
         attributes.merge! missing_nil_attributes.product([nil]).to_h
       end
 
-      super(**build_attributes!(attributes))
+      super(**_build_attributes!(attributes))
     end
 
     def to_h
       super.map do |k, v|
-        hashed_subtypes = process_subtype_values(schema[k], v) { _2.to_h }
+        hashed_subtypes = _process_subtype_values(schema[k], v) { _2.to_h }
         [k, hashed_subtypes]
       end.to_h
     end
@@ -46,34 +50,34 @@ module ActiveFunctionCore::Plugins::Types
 
     private
 
-    def subtype?(type)
+    def _subtype?(type)
       type.is_a?(Class) && (type < RawType || type < Type)
     end
 
-    def subtype_class(type)
+    def _subtype_class(type)
       self.class.const_get(type.name)
     end
 
-    def build_attributes!(attributes)
-      attributes.map(&method(:prepare_attribute)).to_h
+    def _build_attributes!(attributes)
+      attributes.map(&method(:_prepare_attribute)).to_h
     end
 
-    def prepare_attribute(name, value)
+    def _prepare_attribute(name, value)
       raise ArgumentError, "unknown attribute #{name}" unless (type = schema[name])
       raise(TypeError, "expected #{value} to be a #{type}") unless type_validator[value, type].valid?
 
-      serialized_value = process_subtype_values(type, value) { |subtype, attrs| subtype[**attrs] }
+      serialized_value = _process_subtype_values(type, value) { |subtype, attrs| subtype[**attrs] }
 
       [name, serialized_value]
     end
 
-    def process_subtype_values(type, value, &block)
-      if subtype?(type)
-        yield subtype_class(type), value
-      elsif type.is_a?(Array) && subtype?(type[0])
-        value.map { |it| yield(subtype_class(type[0]), it) }
-      elsif type.is_a?(Hash) && subtype?(type.values[0])
-        value.transform_values { |it| yield(subtype_class(type.values[0]), it) }
+    def _process_subtype_values(type, value, &block)
+      if _subtype?(type)
+        yield _subtype_class(type), value
+      elsif type.is_a?(Array) && _subtype?(type.first)
+        value.map { |it| yield(_subtype_class(type.first), it) }
+      elsif type.is_a?(Hash) && _subtype?(type.values.first)
+        value.transform_values { |it| yield(_subtype_class(type.values.first), it) }
       else
         value
       end

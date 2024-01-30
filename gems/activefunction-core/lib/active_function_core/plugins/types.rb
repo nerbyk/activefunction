@@ -30,7 +30,6 @@ module ActiveFunctionCore
         end
 
         def type(hash_attr)
-          @__types        ||= Set.new
           klass, attributes = hash_attr.first
 
           raise ArgumentError, "type Class must be a RawType" unless klass < RawType
@@ -38,6 +37,7 @@ module ActiveFunctionCore
           name = klass.name.split("::").last
           remove_const(name.to_sym)
 
+          @__types ||= Set.new
           @__types << const_set(name, Type.define(type_validator: Validation::TypeValidator, **attributes))
         end
 
