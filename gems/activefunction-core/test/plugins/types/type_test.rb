@@ -5,7 +5,9 @@ require "active_function_core/plugins/types"
 
 describe ActiveFunctionCore::Plugins::Types::Type do
   subject { described_class }
+
   let(:described_class) { ActiveFunctionCore::Plugins::Types::Type }
+  let(:type_validator) { ActiveFunctionCore::Plugins::Types::TypeValidation::TypeValidator }
 
   it { _(subject).must_be(:<, ::Data) }
   it { _(subject).must_respond_to(:define) }
@@ -13,7 +15,7 @@ describe ActiveFunctionCore::Plugins::Types::Type do
   describe ".define" do
     subject { type_klass }
 
-    let(:type_klass) { described_class.define(**schema) }
+    let(:type_klass) { described_class.define(type_validator: type_validator, **schema) }
     let(:schema) { {str: String, int: Integer} }
 
     it { _(subject).must_respond_to(:schema) }
@@ -121,7 +123,7 @@ describe ActiveFunctionCore::Plugins::Types::Type do
       end
 
       describe "Nested type" do
-        let(:nested_type) { Nested = described_class.define(**nested_schema) }
+        let(:nested_type) { Nested = described_class.define(type_validator: type_validator, **nested_schema) }
         let(:nested_schema) { {nested: String} }
 
         let(:schema) { {nested_type: nested_type} }

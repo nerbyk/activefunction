@@ -10,10 +10,13 @@ module ActiveFunctionCore
   require "logger"
   require "active_function_core/version"
   require "active_function_core/plugins/hooks"
+  require "active_function_core/plugins/types"
 
-  def self.logger
+  def logger
     @logger ||= Logger.new($stdout).tap do |log|
       log.progname = name
     end
   end
+
+  module_function :logger
 end
