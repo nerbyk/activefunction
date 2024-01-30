@@ -8,7 +8,7 @@ module ActiveFunctionCore::Plugins::Types
   class Type < Data
     def self.define(type_validator:, **attributes, &block)
       nillable_attributes = attributes.map do |k, v|
-        if k.start_with?("?")
+        if k.to_s.start_with?("?")
           normalized_key = k.to_s.gsub(/^\?/, "").to_sym
           [normalized_key, Nullable[v]]
         else
