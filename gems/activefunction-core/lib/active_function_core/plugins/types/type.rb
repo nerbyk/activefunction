@@ -7,26 +7,32 @@ module ActiveFunctionCore::Plugins::Types
 
   class Type < Data
     def self.define(type_validator:, **attributes, &block)
-      nillable_attributes = attributes.map do |k, v|
-        if k.to_s.start_with?("?")
-          normalized_key = k.to_s.gsub(/^\?/, "").to_sym
-          [normalized_key, Nullable[v]]
-        else
-          [k, v]
-        end
-      end.to_h
+      nillable_attributes = []
+      attributes.keys.each do |k|
+        next unless k.to_s.start_with?("?") || attributes[k].is_a?(Nullable)
 
-      attributes.merge!(nillable_attributes)
+        if k.to_s.start_with?("?")
+          old_name      = k
+          k             = k.to_s.delete_prefix("?").to_sym
+          attributes[k] = Nullable[attributes.delete(old_name)]
+        end
+
+        nillable_attributes << k if attributes[k].is_a?(Nullable)
+      end
 
       super(*attributes.keys, &block).tap do |klass|
         klass.define_singleton_method(:schema) { attributes.freeze }
-        klass.define_singleton_method(:nillable_members) { nillable_attributes.keys }
+        klass.define_singleton_method(:nillable_members) { nillable_attributes }
         klass.define_method(:type_validator) { type_validator }
       end
     end
 
-    def initialize(attrs)
-      super(**build_attributes!(attrs))
+    def initialize(attributes)
+      if (missing_nil_attributes = self.class.nillable_members - attributes.keys).any?
+        attributes.merge! missing_nil_attributes.product([nil]).to_h
+      end
+
+      super(**build_attributes!(attributes))
     end
 
     def to_h
@@ -49,10 +55,6 @@ module ActiveFunctionCore::Plugins::Types
     end
 
     def build_attributes!(attributes)
-      if (missing_nil_attributes = self.class.nillable_members - attributes.keys).any?
-        attributes.merge! missing_nil_attributes.product([nil]).to_h
-      end
-
       attributes.map(&method(:prepare_attribute)).to_h
     end
 

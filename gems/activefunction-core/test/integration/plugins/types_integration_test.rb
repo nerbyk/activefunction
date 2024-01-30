@@ -8,14 +8,16 @@ class TestType
 
   define_schema do
     type NamedType => {
-      string_attribute:  String,
-      integer_attribute: Integer,
-      boolean_attribute: Boolean,
-      array_attribute:   Array[String],
-      hash_attribute:    Hash[Symbol, String],
-      nested_type:       NestedType,
-      array_nested_type: Array[NestedType],
-      hash_nested_type:  Hash[Symbol, NestedType]
+      string_attribute:         String,
+      integer_attribute:        Integer,
+      boolean_attribute:        Boolean,
+      array_attribute:          Array[String],
+      hash_attribute:           Hash[Symbol, String],
+      nested_type:              NestedType,
+      array_nested_type:        Array[NestedType],
+      hash_nested_type:         Hash[Symbol, NestedType],
+      "?nullable_type":         String,
+      alrenative_nullable_type: Nullable[Array[String]]
     }
 
     type NestedType => {
@@ -56,12 +58,23 @@ describe TestType do
 
   let(:sub_nested_type_attributes) { {nested_nested_attribute: "string"} }
 
+  let(:expected_attributes) { attributes.merge(expected_nullable_attributes) }
+  let(:expected_nullable_attributes) { {nullable_type: nil, alrenative_nullable_type: nil} }
+
   it { _(subject).must_be_kind_of TestType::NamedType }
   it { _(subject.nested_type).must_be_kind_of TestType::NestedType }
   it { _(subject.nested_type.sub_nested_type).must_be_kind_of TestType::SubNestedType }
 
   it "should create typed object" do
-    _(subject.to_h).must_equal attributes
+    _(subject.to_h).must_equal expected_attributes
+  end
+
+  it "should create typed object with nullable attributes present" do
+    nullable_present_attrs = {nullable_type: "string", alrenative_nullable_type: ["string"]}
+    attributes.merge!(nullable_present_attrs)
+    expected_attributes.merge!(nullable_present_attrs)
+
+    _(subject.to_h).must_equal expected_attributes
   end
 
   describe "when nested type is invalid" do

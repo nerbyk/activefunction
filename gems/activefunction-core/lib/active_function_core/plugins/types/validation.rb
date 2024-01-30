@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ActiveFunctionCore::Plugins::Types
-  module TypeValidation
+  module Validation
     module ValidationMethods
       class << self
         def type_validator_for(type)
@@ -37,7 +37,7 @@ module ActiveFunctionCore::Plugins::Types
         end
 
         def nullable_type_validation(value, type_class)
-          value.nil? || type_validator_for(type).call(value, type_class)
+          value.nil? || type_validator_for(type_class).call(value, type_class)
         end
 
         def hash_type_validation(value, type_hash)
@@ -69,20 +69,14 @@ module ActiveFunctionCore::Plugins::Types
       include ValidationMethods
 
       def valid?
-        validator_proc[value, type]
-      end
-
-      private def validator_proc
-        type_class = if !type.is_a?(Class)
-          type.class
-        elsif type.is_a?(CustomType) && type.wrapped_type
-          type.wrapped_type
+        if type.is_a?(CustomType) && type.wrapped_type
+          validator_proc[value, type.wrapped_type]
         else
-          type
+          validator_proc[value, type]
         end
-
-        type_validator_for(type_class)
       end
+
+      private def validator_proc = type_validator_for(type)
     end
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "active_function_core/plugins/types/type"
-require "active_function_core/plugins/types/type_validation"
+require "active_function_core/plugins/types/validation"
 
 module ActiveFunctionCore
   module Plugins
@@ -38,7 +38,7 @@ module ActiveFunctionCore
           name = klass.name.split("::").last
           remove_const(name.to_sym)
 
-          @__types << const_set(name, Type.define(type_validator: TypeValidation::TypeValidator, **attributes))
+          @__types << const_set(name, Type.define(type_validator: Validation::TypeValidator, **attributes))
         end
 
         def set_root_type(type)
@@ -56,7 +56,6 @@ module ActiveFunctionCore
 
       def self.included(base)
         base.extend(ClassMethods)
-        base.include(TypeValidation)
       end
     end
   end
