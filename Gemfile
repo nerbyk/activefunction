@@ -10,6 +10,7 @@ eval_gemfile "gemfiles/rubocop.gemfile"
 eval_gemfile "gemfiles/rbs.gemfile"
 
 gem "ruby-next", "~> 1.0.0"
+gem "activefunction-core", path: "gems/activefunction-core"
 
 local_gemfile = "#{File.dirname(__FILE__)}/Gemfile.local"
 

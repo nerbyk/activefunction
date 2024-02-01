@@ -62,7 +62,7 @@ module ActiveFunctionCore::Plugins::Types
 
     def _prepare_attribute(name, value)
       raise ArgumentError, "unknown attribute #{name}" unless (type = schema[name])
-      raise(TypeError, "expected #{value} to be a #{type}") unless type_validator[value, type].valid?
+      raise(TypeError, "expected #{name}: #{value} to be a #{type}") unless type_validator[value, type].valid?
 
       serialized_value = _process_subtype_values(type, value) { |subtype, attrs| subtype[**attrs] }
 
@@ -70,11 +70,13 @@ module ActiveFunctionCore::Plugins::Types
     end
 
     def _process_subtype_values(type, value, &block)
+      type = type.wrapped_type if type.respond_to?(:wrapped_type)
+
       if _subtype?(type)
         yield _subtype_class(type), value
-      elsif type.is_a?(Array) && _subtype?(type.first)
+      elsif type.is_a?(Array) && value.is_a?(Array) && _subtype?(type.first)
         value.map { |it| yield(_subtype_class(type.first), it) }
-      elsif type.is_a?(Hash) && _subtype?(type.values.first)
+      elsif type.is_a?(Hash) && value.is_a?(Hash) && _subtype?(type.values.first)
         value.transform_values { |it| yield(_subtype_class(type.values.first), it) }
       else
         value
