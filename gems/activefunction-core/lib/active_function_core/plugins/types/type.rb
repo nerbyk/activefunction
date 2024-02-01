@@ -7,7 +7,7 @@ module ActiveFunctionCore::Plugins::Types
 
   class Type < Data
     def self.define(type_validator:, **attributes, &block)
-      nillable_attributes = extract_nillable_attributes!(attributes)
+      nillable_attributes = handle_nillable_attributes!(attributes)
 
       super(*attributes.keys, &block).tap do |klass|
         klass.define_singleton_method(:schema) { attributes.freeze }
@@ -16,19 +16,17 @@ module ActiveFunctionCore::Plugins::Types
       end
     end
 
-    private_class_method def self.extract_nillable_attributes!(attributes)
-      attributes.keys.filter_map do |key|
-        next false unless key.to_s.start_with?("?") || attributes[key].is_a?(Nullable)
+    private_class_method def self.handle_nillable_attributes!(attributes)
+      attributes.keys.lazy
+        .select { |key| key.to_s.start_with?("?") || attributes[key].is_a?(Nullable) }
+        .map do |key|
+          next key unless key.to_s.start_with?("?")
 
-        if key.to_s.start_with?("?")
-          new_key             = key.to_s.delete_prefix("?").to_sym
-          attributes[new_key] = Nullable[attributes.delete(key)]
-
-          new_key
-        else
-          key
+          normalized_key             = key.to_s.delete_prefix("?").to_sym
+          attributes[normalized_key] = Nullable[attributes.delete(key)]
+          normalized_key
         end
-      end
+        .to_a
     end
 
     def initialize(attributes)
