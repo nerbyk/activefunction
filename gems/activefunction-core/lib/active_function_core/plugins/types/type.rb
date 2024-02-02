@@ -57,7 +57,7 @@ module ActiveFunctionCore::Plugins::Types
     end
 
     def _build_attributes!(attributes)
-      attributes.map(&method(:_prepare_attribute)).to_h
+      attributes.map { _prepare_attribute(_1, _2) }.to_h
     end
 
     def _prepare_attribute(name, value)
@@ -72,11 +72,11 @@ module ActiveFunctionCore::Plugins::Types
     def _process_subtype_values(type, value, &block)
       type = type.wrapped_type if type.respond_to?(:wrapped_type)
 
-      if _subtype?(type)
+      if value && _subtype?(type)
         yield _subtype_class(type), value
-      elsif type.is_a?(Array) && value.is_a?(Array) && _subtype?(type.first)
+      elsif value.is_a?(Array) && type.is_a?(Array) &&  _subtype?(type.first)
         value.map { |it| yield(_subtype_class(type.first), it) }
-      elsif type.is_a?(Hash) && value.is_a?(Hash) && _subtype?(type.values.first)
+      elsif value.is_a?(Hash) && type.is_a?(Hash) && _subtype?(type.values.first)
         value.transform_values { |it| yield(_subtype_class(type.values.first), it) }
       else
         value
