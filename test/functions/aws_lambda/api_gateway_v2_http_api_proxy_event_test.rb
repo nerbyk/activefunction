@@ -1,7 +1,9 @@
-require 'test_helper'
+# frozen_string_literal: true
+
+require "test_helper"
 require "support/aws_event_helper"
 require "active_function"
-require 'active_function/functions/aws_lambda/api_gateway_v2_http_api_proxy_event'
+require "active_function/functions/aws_lambda/api_gateway_v2_http_api_proxy_event"
 
 describe ActiveFunction::Functions::AwsLambda::ApiGatewayV2HttpApiProxyEvent do
   subject { described_class.new(**event_hash) }
@@ -17,8 +19,8 @@ describe ActiveFunction::Functions::AwsLambda::ApiGatewayV2HttpApiProxyEvent do
   it { _(described_class::ClientCert).must_be :<, described_class::Type }
   it { _(described_class::Validity).must_be :<, described_class::Type }
   it { _(described_class::Http).must_be :<, described_class::Type }
-  
-  it { _(subject).must_be_kind_of described_class::Event } 
+
+  it { _(subject).must_be_kind_of described_class::Event }
   it { _(subject.to_h).must_equal event_hash }
 
   describe ActiveFunction::Functions::AwsLambda::ApiGatewayV2HttpApiProxyEvent::Event do
@@ -63,7 +65,7 @@ describe ActiveFunction::Functions::AwsLambda::ApiGatewayV2HttpApiProxyEvent do
 
       before do
         nullable_fields.each { |field| event_hash.delete(field) }
-      end 
+      end
 
       it { _(subject.to_h).must_equal expected_hash }
     end
@@ -111,7 +113,7 @@ describe ActiveFunction::Functions::AwsLambda::ApiGatewayV2HttpApiProxyEvent do
 
       before do
         nullable_fields.each { |field| event_hash[:requestContext].delete(field) }
-      end 
+      end
 
       it { _(subject.to_h).must_equal expected_hash }
     end
@@ -184,7 +186,7 @@ describe ActiveFunction::Functions::AwsLambda::ApiGatewayV2HttpApiProxyEvent do
 
       before do
         nullable_fields.each { |field| event_hash[:requestContext][:http].delete(field) }
-      end 
+      end
 
       it { _(subject.to_h).must_equal expected_hash }
     end

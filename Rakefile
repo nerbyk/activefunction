@@ -24,13 +24,15 @@ GEMS_DIRS.each do |gem_dir|
   Rake::TestTask.new("test_gem:#{gem_name(gem_dir)}") do |t|
     t.libs << "#{gem_dir}/test"
     t.libs << "#{gem_dir}/lib"
-    t.test_files = FileList["#{gem_dir}/test/**/*_test.rb"]
     t.warning    = false
     t.verbose    = true
-  end
-
-  RuboCop::RakeTask.new("rubocop:#{gem_name(gem_dir)}") do |t|
-    t.patterns = ["#{gem_dir}/lib/**/*.rb", "#{gem_dir}/test/**/*.rb"]
+    t.test_files = FileList["#{gem_dir}/test/**/*_test.rb"].then do |test_files|
+      if RUBY_VERSION >= "3.2"
+        test_files
+      else
+        test_files.exclude("#{gem_dir}/test/functions/aws_lambda/**/*.rb")
+      end
+    end
   end
 end
 

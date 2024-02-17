@@ -1,36 +1,38 @@
+# frozen_string_literal: true
+
 module ActiveFunction::Functions::AwsLambda
   class ApiGatewayV2HttpApiProxyEvent
-   include ActiveFunctionCore::Plugins::Types
+    include ActiveFunctionCore::Plugins::Types
 
     define_schema do
       type Event => {
-        version: String,
-        routeKey: String,
-        rawPath: String,
-        rawQueryString: String,
-        cookies: Array[String],
-        headers: Hash[Symbol, String],
-        requestContext: RequestContext,
-        isBase64Encoded: Boolean,
-        "?body": String,
-        "?pathParameters": Hash[Symbol, String],
+        version:                  String,
+        routeKey:                 String,
+        rawPath:                  String,
+        rawQueryString:           String,
+        cookies:                  Array[String],
+        headers:                  Hash[Symbol, String],
+        requestContext:           RequestContext,
+        isBase64Encoded:          Boolean,
+        "?body":                  String,
+        "?pathParameters":        Hash[Symbol, String],
         "?queryStringParameters": Hash[Symbol, String],
-        "?stageVariables": Hash[Symbol, String]
+        "?stageVariables":        Hash[Symbol, String]
       }
 
       type RequestContext => {
-        accountId: String,
-        apiId: String,
-        "?authorizer": Authorizer,
+        accountId:         String,
+        apiId:             String,
+        "?authorizer":     Authorizer,
         "?authentication": Authentication,
-        domainName: String,
-        "?domainPrefix": String,
-        http: Http,
-        requestId: String,
-        routeKey: String,
-        stage: String,
-        time: String,
-        timeEpoch: Integer
+        domainName:        String,
+        "?domainPrefix":   String,
+        http:              Http,
+        requestId:         String,
+        routeKey:          String,
+        stage:             String,
+        time:              String,
+        timeEpoch:         Integer
       }
 
       type Authentication => {
@@ -39,15 +41,15 @@ module ActiveFunction::Functions::AwsLambda
 
       type ClientCert => {
         clientCertPem: String,
-        subjectDN: String,
-        issuerDN: String,
-        serialNumber: String,
-        validity: Validity
+        subjectDN:     String,
+        issuerDN:      String,
+        serialNumber:  String,
+        validity:      Validity
       }
 
       type Validity => {
         notBefore: String,
-        notAfter: String
+        notAfter:  String
       }
 
       type Authorizer => {
@@ -60,10 +62,10 @@ module ActiveFunction::Functions::AwsLambda
       }
 
       type Http => {
-        method: String,
-        path: String,
-        protocol: String,
-        "?sourceIp": String,
+        method:       String,
+        path:         String,
+        protocol:     String,
+        "?sourceIp":  String,
         "?userAgent": String
       }
     end

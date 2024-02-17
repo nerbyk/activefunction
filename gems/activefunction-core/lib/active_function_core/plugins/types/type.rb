@@ -74,7 +74,7 @@ module ActiveFunctionCore::Plugins::Types
 
       if value && _subtype?(type)
         yield _subtype_class(type), value
-      elsif value.is_a?(Array) && type.is_a?(Array) &&  _subtype?(type.first)
+      elsif value.is_a?(Array) && type.is_a?(Array) && _subtype?(type.first)
         value.map { |it| yield(_subtype_class(type.first), it) }
       elsif value.is_a?(Hash) && type.is_a?(Hash) && _subtype?(type.values.first)
         value.transform_values { |it| yield(_subtype_class(type.values.first), it) }
