@@ -34,6 +34,10 @@ GEMS_DIRS.each do |gem_dir|
       end
     end
   end
+
+  RuboCop::RakeTask.new("rubocop:#{gem_name(gem_dir)}") do |t|
+    t.patterns = ["#{gem_dir}/lib/**/*.rb", "#{gem_dir}/test/**/*.rb"]
+  end
 end
 
 desc "Run All Tests in each gem"
