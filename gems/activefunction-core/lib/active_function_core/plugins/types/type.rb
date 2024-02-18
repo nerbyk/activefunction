@@ -79,15 +79,15 @@ module ActiveFunctionCore::Plugins::Types
       [name, serialized_value]
     end
 
-    def _process_subtype_values(type, value, &embedded_element_block)
+    def _process_subtype_values(type, value, &transform_values_block)
       type = type.wrapped_type if type.respond_to?(:wrapped_type)
 
       if value && _subtype?(type)
-        embedded_element_block[_subtype_class(type), value]
+        transform_values_block[_subtype_class(type), value]
       elsif value.is_a?(Array) && type.is_a?(Array) && _subtype?(type.first)
-        value.map { |it| embedded_element_block[_subtype_class(type.first), it] }
+        value.map { |it| transform_values_block[_subtype_class(type.first), it] }
       elsif value.is_a?(Hash) && type.is_a?(Hash) && _subtype?(type.values.first)
-        value.transform_values { |it| embedded_element_block[_subtype_class(type.values.first), it] }
+        value.transform_values { |it| transform_values_block[_subtype_class(type.values.first), it] }
       else
         value
       end
