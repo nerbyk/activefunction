@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "active_function_core/plugins/types"
+
 module ActiveFunction::Functions::AwsLambda
   class ApiGatewayV2HttpApiProxyEvent
     include ActiveFunctionCore::Plugins::Types
