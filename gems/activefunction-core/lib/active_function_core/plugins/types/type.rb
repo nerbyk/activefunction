@@ -4,6 +4,9 @@ module ActiveFunctionCore::Plugins::Types
   CustomType = Struct.new(:wrapped_type)
   Boolean    = Class.new(CustomType)
   Nullable   = Class.new(CustomType)
+  Enum       = Class.new(CustomType) do
+    def initialize(*types) = super(types)
+  end
 
   class Type < Data
     def self.define(type_validator:, **attributes, &block)
@@ -57,11 +60,18 @@ module ActiveFunctionCore::Plugins::Types
     end
 
     def _build_attributes!(attributes)
-      attributes.map { _prepare_attribute(_1, _2) }.to_h
+      attributes.map do |name, value|
+        if (type = schema[name])
+          type = _subtype_class(type) if type.is_a?(Class) && type < RawType
+        else
+          raise ArgumentError, "unknown attribute #{name}"
+        end
+
+        _prepare_attribute(name, value, type)
+      end.to_h
     end
 
-    def _prepare_attribute(name, value)
-      raise ArgumentError, "unknown attribute #{name}" unless (type = schema[name])
+    def _prepare_attribute(name, value, type)
       raise(TypeError, "expected #{name}: #{value} to be a #{type}") unless type_validator[value, type].valid?
 
       serialized_value = _process_subtype_values(type, value) { |subtype, attrs| subtype[**attrs] }
@@ -69,15 +79,15 @@ module ActiveFunctionCore::Plugins::Types
       [name, serialized_value]
     end
 
-    def _process_subtype_values(type, value, &block)
+    def _process_subtype_values(type, value, &embedded_element_block)
       type = type.wrapped_type if type.respond_to?(:wrapped_type)
 
       if value && _subtype?(type)
-        yield _subtype_class(type), value
+        embedded_element_block[_subtype_class(type), value]
       elsif value.is_a?(Array) && type.is_a?(Array) && _subtype?(type.first)
-        value.map { |it| yield(_subtype_class(type.first), it) }
+        value.map { |it| embedded_element_block[_subtype_class(type.first), it] }
       elsif value.is_a?(Hash) && type.is_a?(Hash) && _subtype?(type.values.first)
-        value.transform_values { |it| yield(_subtype_class(type.values.first), it) }
+        value.transform_values { |it| embedded_element_block[_subtype_class(type.values.first), it] }
       else
         value
       end

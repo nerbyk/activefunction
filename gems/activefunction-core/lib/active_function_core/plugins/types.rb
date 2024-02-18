@@ -34,11 +34,15 @@ module ActiveFunctionCore
 
           raise ArgumentError, "type Class must be a RawType" unless klass < RawType
 
-          name = klass.name.split("::").last
-          remove_const(name.to_sym)
+          name = klass.name.split("::").last.to_sym
+          remove_const(name)
 
           @__types ||= Set.new
-          @__types << const_set(name, Type.define(type_validator: Validation::TypeValidator, **attributes))
+          @__types << if attributes.is_a?(Hash)
+            const_set(name, Type.define(type_validator: Validation::TypeValidator, **attributes))
+          else
+            const_set(name, attributes)
+          end
         end
 
         def set_root_type(type)
