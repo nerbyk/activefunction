@@ -4,12 +4,12 @@ type apiGatewayV2HTTPEvent = {
   rawPath: String,
   rawQueryString: String,
   cookies: Array[String],
-  headers: Hash[Symbol, String],
-  queryStringParameters: Hash[Symbol, String],
-  pathParameters: Hash[Symbol, String],
+  ?headers: Hash[Symbol, String],
+  ?queryStringParameters: Hash[Symbol, String],
+  ?pathParameters: Hash[Symbol, String],
+  ?stageVariables: Hash[Symbol, String],
   requestContext: apiGatewayV2HTTPRequestContext,
-  stageVariables: Hash[Symbol, String],
-  body: String,
+  ?body: String,
   isBase64Encoded: bool
 }
 
@@ -25,7 +25,7 @@ type apiGatewayV2HTTPRequestContext = {
   timeEpoch: Integer,
   authorizer: apiGatewayV2HTTPRequestContextAuthorizer,
   http: apiGatewayV2HTTPRequestContextHTTP,
-  authentication: apiGatewayV2HTTPRequestContextAuthentication,
+  ?authentication: apiGatewayV2HTTPRequestContextAuthentication,
 }
 
 type apiGatewayV2HTTPRequestContextAuthorizer = {

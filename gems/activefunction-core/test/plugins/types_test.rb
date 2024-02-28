@@ -22,8 +22,11 @@ describe ActiveFunctionCore::Plugins::Types do
   describe "::type" do
     class TypeTestClass < TypesIncludedTestClass
       type NamedType => {
-        string_attribute: String
+        string_attribute:       String,
+        single_value_attribute: SingleValueType
       }
+
+      type SingleValueType => ActiveFunctionCore::Plugins::Types::Enum[Symbol, String]
     end
 
     let(:klass) { TypeTestClass }
@@ -31,10 +34,14 @@ describe ActiveFunctionCore::Plugins::Types do
     it "defines Constant < Type" do
       _(subject.const_defined?(:NamedType)).must_equal true
       _(subject.const_get(:NamedType)).must_be :<, described_class::Type
+
+      _(subject.const_defined?(:SingleValueType)).must_equal true
+      _(subject.const_get(:SingleValueType)).must_equal ActiveFunctionCore::Plugins::Types::Enum[Symbol, String]
     end
 
     it "adds type to types" do
       _(subject.instance_variable_get(:@__types)).must_be :===, subject::NamedType
+      _(subject.instance_variable_get(:@__types)).must_be :===, subject::SingleValueType
     end
 
     it "redefines RawType to Type" do

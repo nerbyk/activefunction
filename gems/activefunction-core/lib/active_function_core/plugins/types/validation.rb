@@ -45,6 +45,10 @@ module ActiveFunctionCore::Plugins::Types
           key_validator, value_validator = [type_validator_for(key_type), type_validator_for(value_type)]
           literal_type_validation(value, Hash) && value.all? { |k, v| key_validator[k, key_type] && value_validator[v, value_type] }
         end
+
+        def enum_type_validation(value, type_enum)
+          type_enum.any? { |it| literal_type_validation(value, it) }
+        end
       end
 
       def self.included(base)
@@ -59,7 +63,8 @@ module ActiveFunctionCore::Plugins::Types
         Boolean  => method(:boolean_type_validation),
         Array    => method(:array_type_validation),
         Hash     => method(:hash_type_validation),
-        Nullable => method(:nullable_type_validation)
+        Nullable => method(:nullable_type_validation),
+        Enum     => method(:enum_type_validation)
       }
 
       private_constant :PRIMITIVE_TYPE_VALIDATORS_MAPPING
@@ -67,6 +72,12 @@ module ActiveFunctionCore::Plugins::Types
 
     TypeValidator = Data.define(:value, :type) do
       include ValidationMethods
+
+      def validate!
+        unless valid?
+          raise TypeError, "expected #{value} to be kind of #{type}"
+        end
+      end
 
       def valid?
         if type.is_a?(CustomType) && type.wrapped_type

@@ -43,6 +43,12 @@ module PrimitiveValidationTest
 
     assert @subject.valid?
   end
+
+  def test_enum_validation
+    @attrs = {value: "Hello", type: ::ActiveFunctionCore::Plugins::Types::Enum[String, Integer]}
+
+    assert @subject.valid?
+  end
 end
 
 class ValidationTest < Minitest::Test

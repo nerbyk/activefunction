@@ -6,4 +6,6 @@ require "ruby-next/language/runtime"
 require "minitest/autorun"
 require "minitest/reporters"
 
+require "active_function"
+
 Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new(color: true)]

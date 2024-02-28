@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "active_function_core/plugins/types/type"
-require "active_function_core/plugins/types/validation"
-
 module ActiveFunctionCore
   module Plugins
     module Types
+      require "active_function_core/plugins/types/type"
+      require "active_function_core/plugins/types/validation"
+
       RawType = Class.new
 
       module ClassMethods
@@ -34,11 +34,12 @@ module ActiveFunctionCore
 
           raise ArgumentError, "type Class must be a RawType" unless klass < RawType
 
-          name = klass.name.split("::").last
-          remove_const(name.to_sym)
+          type_name       = klass.name.split("::").last.to_sym
+          type_attributes = attributes.is_a?(Hash) ? Type.define(**attributes) : attributes
 
-          @__types ||= Set.new
-          @__types << const_set(name, Type.define(type_validator: Validation::TypeValidator, **attributes))
+          remove_const(type_name).tap do
+            (@__types ||= Set.new) << const_set(type_name, type_attributes)
+          end
         end
 
         def set_root_type(type)
