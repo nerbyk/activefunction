@@ -73,6 +73,12 @@ module ActiveFunctionCore::Plugins::Types
     TypeValidator = Data.define(:value, :type) do
       include ValidationMethods
 
+      def validate!
+        unless valid?
+          raise TypeError, "expected #{value} to be kind of #{type}"
+        end
+      end
+
       def valid?
         if type.is_a?(CustomType) && type.wrapped_type
           validator_proc[value, type.wrapped_type]

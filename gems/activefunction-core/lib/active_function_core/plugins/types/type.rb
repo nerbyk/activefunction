@@ -9,7 +9,7 @@ module ActiveFunctionCore::Plugins::Types
   end
 
   class Type < Data
-    def self.define(type_validator:, **attributes, &block)
+    def self.define(type_validator: Validation::TypeValidator, **attributes, &block)
       nillable_attributes = handle_nillable_attributes!(attributes)
 
       super(*attributes.keys, &block).tap do |klass|
@@ -72,7 +72,7 @@ module ActiveFunctionCore::Plugins::Types
     end
 
     def _prepare_attribute(name, value, type)
-      raise(TypeError, "expected #{name}: #{value} to be a #{type}") unless type_validator[value, type].valid?
+      type_validator[value, type].validate!
 
       serialized_value = _process_subtype_values(type, value) { |subtype, attrs| subtype[**attrs] }
 
