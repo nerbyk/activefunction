@@ -76,7 +76,7 @@ end
 desc "Transpile all gems"
 task "nextify:all" do
   with_all_gems(false) do |path|
-    sh "bundle exec ruby-next nextify #{path}/lib -V"
+    sh "bundle exec ruby-next nextify #{path} -V"
   end
 end
 

@@ -17,7 +17,9 @@ class FunctionWithStrongParameters < ActiveFunction::Base
     @response.body = request_body.permit(*PERMITTED_PARAMS).to_h
   end
 
-  private def request_body = params.require(:body)
+  private def request_body
+    params.require(:body)
+  end
 end
 
 describe FunctionWithStrongParameters do
