@@ -32,7 +32,15 @@ GEMS_DIRS.each do |gem_dir|
       else
         test_files.exclude("#{gem_dir}/test/functions/aws_lambda/**/*.rb")
       end
+
+      test_files.exclude("#{gem_dir}/test/integration/**/*.rb")
     end
+  end
+
+  task "test_gem:#{gem_name(gem_dir)}:integration" do
+    Dir.glob("#{gem_dir}/test/integration/**/*_test.rb").each do |test_file|
+      sh(Gem.ruby, "-I#{__dir__}/lib:#{__dir__}/test", test_file)
+    end || raise("Integration tests failed")
   end
 
   RuboCop::RakeTask.new("rubocop:#{gem_name(gem_dir)}") do |t|
@@ -44,6 +52,7 @@ desc "Run All Tests in each gem"
 task "test:all" do
   with_all_gems do |name|
     Rake::Task["test_gem:#{name}"].invoke
+    Rake::Task["test_gem:#{name}:integration"].invoke
   end
 end
 
